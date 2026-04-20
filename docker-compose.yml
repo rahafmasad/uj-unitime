@@ -1,0 +1,49 @@
+# UniTime local development — MySQL in Docker
+#
+# Usage:
+#   1. Save this file at the ROOT of your cloned UniTime repo
+#      (same level as JavaSource, WebContent, pom.xml)
+#   2. From a terminal in that folder, run:
+#        docker compose up -d
+#   3. MySQL will start on localhost:3306 and auto-load:
+#        - schema.sql   (tables, 'timetable' user, default admin)
+#        - woebegon-data.sql (demo dataset — Fal 2010 Woebegon College)
+#
+# NOTE: init scripts only run on FIRST boot (empty volume).
+# To reset and reload, run:
+#   docker compose down -v
+#   docker compose up -d
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: unitime-mysql
+    restart: unless-stopped
+    environment:
+      # Root password — used only during SQL script initialization.
+      # The 'timetable' app user is created inside schema.sql with
+      # username=timetable / password=unitime.
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3306:3306"
+    volumes:
+      # Persistent data
+      - unitime_mysql_data:/var/lib/mysql
+      # UniTime schema + Woebegon sample data — auto-run on first boot.
+      # Scripts run alphabetically, so the 01/02 prefixes enforce order.
+      - ./Documentation/Database/MySQL/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./Documentation/Database/MySQL/woebegon-data.sql:/docker-entrypoint-initdb.d/02-woebegon.sql:ro
+    # UTF-8 everywhere — essential for Arabic content during Arabization.
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone=+00:00
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  unitime_mysql_data:
+    name: unitime_mysql_data

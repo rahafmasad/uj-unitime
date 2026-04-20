@@ -11,3 +11,6 @@
 /gwt-unitCache
 /WebContent/unitime
 /WebContent/WEB-INF/deploy
+.classpath
+.project
+.settings/
