@@ -14,3 +14,8 @@
 .classpath
 .project
 .settings/
+
+# IDE configuration files (kept locally but not tracked)
+.classpath
+.project
+.settings/
