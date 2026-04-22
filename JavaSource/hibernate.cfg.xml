@@ -27,7 +27,7 @@
 <session-factory> <!-- name="unitime:hibernate/SessionFactory" -->
 
 	<!-- MySQL Configuration -->
-	<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+	<property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
 	<property name="connection.url">jdbc:mysql://localhost:3306/timetable?useSSL=false&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;allowPublicKeyRetrieval=true</property>
 	<property name="connection.username">timetable</property>
 	<property name="connection.password">unitime</property>
