@@ -20,9 +20,9 @@
 
 use mysql;
 
-create user if not exists timetable@localhost identified by 'unitime';
+create user if not exists timetable@'%' identified by 'unitime'; /*this: timetable@% will be %.dockerhost.local in case of production*/
 
-grant all on timetable.* to timetable@localhost;
+grant all on timetable.* to timetable@'%';
 
 flush privileges;
 
