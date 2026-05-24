@@ -76,7 +76,7 @@ public class ExaminationsTableBuilder extends TableBuilder {
         if (exam.getExamType().getType() == ExamType.sExamTypeMidterm) {
             MidtermPeriodPreferenceModel epx = new MidtermPeriodPreferenceModel(exam.getSession(), exam.getExamType());
             epx.load(exam);
-            CellInterface cell = epx.toCellInterface();
+            CellInterface cell = epx.toCellInterface(isUsePrefStyles());
         	if (ApplicationProperty.LegacyPeriodPreferences.isTrue()) {
         		cell.setMouseOver("$wnd.showGwtTimeHint($wnd.lastMouseOverElement,'" + exam.getUniqueId() + ",-1');");
         		cell.setMouseOut("$wnd.hideGwtTimeHint();");
@@ -89,12 +89,16 @@ public class ExaminationsTableBuilder extends TableBuilder {
         	CellInterface cell = new CellInterface();
         	for (Object o: prefs) {
         		ExamPeriodPref tp = (ExamPeriodPref)o;
-        		cell.add(tp.preferenceAbbv())
-                		.setColor(PreferenceLevel.prolog2color(tp.getPrefLevel().getPrefProlog()))
+        		CellInterface c = cell.add(tp.preferenceAbbv())
                 		.setTitle(tp.getPrefLevel().getPrefName() + " " + tp.preferenceText())
-                		.setNoWrap(true)
-                		.setInline(false)
                 		.setAria(tp.getPrefLevel().getAbbreviation() + " " + tp.preferenceText());
+        		if (isUsePrefStyles()) {
+        			c.setClassName("pref-" + PreferenceLevel.prolog2char(tp.getPrefLevel().getPrefProlog()));
+        		} else {
+        			c.setColor(PreferenceLevel.prolog2color(tp.getPrefLevel().getPrefProlog()))
+        				.setNoWrap(true)
+        				.setInline(false);
+        		}
         	}
         	if (ApplicationProperty.LegacyPeriodPreferences.isTrue()) {
         		cell.setMouseOver("$wnd.showGwtTimeHint($wnd.lastMouseOverElement,'" + exam.getUniqueId() + ",-1');");
@@ -110,7 +114,7 @@ public class ExaminationsTableBuilder extends TableBuilder {
         	px.load(exam);
         	CellInterface c = new CellInterface();
         	c.setImage(new ImageInterface()
-        			.setSource("pattern?v=" + (timeVertical ? 1 : 0) + "&x=" + exam.getUniqueId()).setAlt(px.toString())
+        			.setSource("pattern?v=" + (timeVertical ? 1 : 0) + "&x=" + exam.getUniqueId()).setAlt(px.toString(), MSG.altNoPreferences())
         			.setGenerator(new ImageGenerator() {
 						public Object generate() {
 							return new RequiredTimeTable(px).createBufferedImage(timeVertical);
@@ -230,7 +234,8 @@ public class ExaminationsTableBuilder extends TableBuilder {
             			distPref.add(MSG.notAssigned()).addStyle("font-style: italic;");
                 } else {
                 	if (view && assignment.getPeriodPref() != null) {
-                		CellInterface cell = perPref.add(assignment.getPeriodAbbreviation()).setColor(PreferenceLevel.prolog2color(assignment.getPeriodPref()));
+                		CellInterface cell = perPref.add(assignment.getPeriodAbbreviation());
+                		cell.setColor(PreferenceLevel.prolog2color(assignment.getPeriodPref()));
                     	if (ApplicationProperty.LegacyPeriodPreferences.isTrue()) {
                     		cell.setMouseOver("$wnd.showGwtTimeHint($wnd.lastMouseOverElement,'" + exam.getUniqueId() + "," + assignment.getPeriodId() + "');");
                     		cell.setMouseOut("$wnd.hideGwtTimeHint();");

@@ -66,6 +66,8 @@ import org.unitime.timetable.gwt.shared.ReservationInterface;
 import org.unitime.timetable.gwt.shared.TableInterface.NaturalOrderComparator;
 import org.unitime.timetable.gwt.shared.UserAuthenticationProvider;
 
+import com.google.gwt.aria.client.Id;
+import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
@@ -87,6 +89,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Event.NativePreviewEvent;
@@ -121,6 +124,7 @@ public class EnrollmentTable extends Composite {
 	
 	private SimpleForm iEnrollmentPanel;
 	private UniTimeTable<ClassAssignmentInterface.Enrollment> iEnrollments;
+	private int iEnrollmentsLine = 0;
 	private UniTimeHeaderPanel iHeader;
 	private Operation iApprove, iReject;
 	private StudentSchedule iStudentSchedule;
@@ -171,7 +175,8 @@ public class EnrollmentTable extends Composite {
 		}
 		
 		iEnrollments = new UniTimeTable<ClassAssignmentInterface.Enrollment>();
-		iEnrollmentPanel.addRow(iEnrollments);
+		iEnrollmentsLine = iEnrollmentPanel.addRow(iEnrollments);
+		iEnrollmentPanel.getRowFormatter().setVisible(iEnrollmentsLine, false);
 		
 		if (!showHeader)
 			iEnrollmentPanel.addBottomRow(iHeader);
@@ -620,6 +625,55 @@ public class EnrollmentTable extends Composite {
 				final UniTimeTable<ClassAssignmentInterface.SectioningAction> table = new UniTimeTable<ClassAssignmentInterface.SectioningAction>();
 				final Map<Long, HTML> id2message = new HashMap<Long, HTML>();
 				
+				table.addMouseClickListener(new MouseClickListener<ClassAssignmentInterface.SectioningAction>() {
+					@Override
+					public void onMouseClick(TableEvent<SectioningAction> event) {
+						if (event.getData() != null) {
+							LoadingWidget.getInstance().show(MESSAGES.loadingChangeLogMessage());
+							iSectioningService.getChangeLogMessage(event.getData().getLogId(), new AsyncCallback<String>() {
+								@Override
+								public void onSuccess(String message) {
+									LoadingWidget.getInstance().hide();
+									final HTML widget = new HTML(message);
+									final ScrollPanel scroll = new ScrollPanel(widget);
+									scroll.setHeight(((int)(0.8 * Window.getClientHeight())) + "px");
+									scroll.setStyleName("unitime-ScrollPanel");
+									scroll.setWidth("800px");
+									scroll.getElement().setTabIndex(0);
+									final UniTimeDialogBox dialog = new UniTimeDialogBox(true, false);
+									dialog.setWidget(scroll);
+									dialog.setText(MESSAGES.dialogChangeMessage(student.getName()));
+									dialog.setEscapeToHide(true);
+									dialog.addOpenHandler(new OpenHandler<UniTimeDialogBox>() {
+										@Override
+										public void onOpen(OpenEvent<UniTimeDialogBox> event) {
+											RootPanel.getBodyElement().getStyle().setOverflow(Overflow.HIDDEN);
+											scroll.setHeight(Math.min(widget.getElement().getScrollHeight(), Window.getClientHeight() * 80 / 100) + "px");
+											dialog.setPopupPosition(
+													Math.max(Window.getScrollLeft() + (Window.getClientWidth() - dialog.getOffsetWidth()) / 2, 0),
+													Math.max(Window.getScrollTop() + (Window.getClientHeight() - dialog.getOffsetHeight()) / 2, 0));
+										}
+									});
+									dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
+										@Override
+										public void onClose(CloseEvent<PopupPanel> event) {
+											table.clearHover();
+											RootPanel.getBodyElement().getStyle().setOverflow(Overflow.AUTO);
+										}
+									});
+									dialog.center();
+								}
+								
+								@Override
+								public void onFailure(Throwable caught) {
+									LoadingWidget.getInstance().hide();
+									UniTimeNotifications.error(caught);
+								}
+							});
+						}
+					}
+				});
+				
 				table.addRow(null,
 						new UniTimeTableHeader(MESSAGES.colOperation()),
 						new UniTimeTableHeader(MESSAGES.colTimeStamp()),
@@ -654,52 +708,7 @@ public class EnrollmentTable extends Composite {
 						public void onFailure(Throwable caught) {}
 					});
 				}
-				table.addMouseClickListener(new MouseClickListener<ClassAssignmentInterface.SectioningAction>() {
-					@Override
-					public void onMouseClick(TableEvent<SectioningAction> event) {
-						if (event.getData() != null) {
-							LoadingWidget.getInstance().show(MESSAGES.loadingChangeLogMessage());
-							iSectioningService.getChangeLogMessage(event.getData().getLogId(), new AsyncCallback<String>() {
-								@Override
-								public void onSuccess(String message) {
-									LoadingWidget.getInstance().hide();
-									final HTML widget = new HTML(message);
-									final ScrollPanel scroll = new ScrollPanel(widget);
-									scroll.setHeight(((int)(0.8 * Window.getClientHeight())) + "px");
-									scroll.setStyleName("unitime-ScrollPanel");
-									final UniTimeDialogBox dialog = new UniTimeDialogBox(true, false);
-									dialog.setWidget(scroll);
-									dialog.setText(MESSAGES.dialogChangeMessage(student.getName()));
-									dialog.setEscapeToHide(true);
-									dialog.addOpenHandler(new OpenHandler<UniTimeDialogBox>() {
-										@Override
-										public void onOpen(OpenEvent<UniTimeDialogBox> event) {
-											RootPanel.getBodyElement().getStyle().setOverflow(Overflow.HIDDEN);
-											scroll.setHeight(Math.min(widget.getElement().getScrollHeight(), Window.getClientHeight() * 80 / 100) + "px");
-											dialog.setPopupPosition(
-													Math.max(Window.getScrollLeft() + (Window.getClientWidth() - dialog.getOffsetWidth()) / 2, 0),
-													Math.max(Window.getScrollTop() + (Window.getClientHeight() - dialog.getOffsetHeight()) / 2, 0));
-										}
-									});
-									dialog.addCloseHandler(new CloseHandler<PopupPanel>() {
-										@Override
-										public void onClose(CloseEvent<PopupPanel> event) {
-											table.clearHover();
-											RootPanel.getBodyElement().getStyle().setOverflow(Overflow.AUTO);
-										}
-									});
-									dialog.center();
-								}
-								
-								@Override
-								public void onFailure(Throwable caught) {
-									LoadingWidget.getInstance().hide();
-									UniTimeNotifications.error(caught);
-								}
-							});
-						}
-					}
-				});
+
 				final UniTimeDialogBox dialog = new UniTimeDialogBox(true, false);
 				final ScrollPanel scroll = new ScrollPanel(table);
 				scroll.setHeight(((int)(0.8 * Window.getClientHeight())) + "px");
@@ -1548,8 +1557,11 @@ public class EnrollmentTable extends Composite {
 		
 		if (showFilter) {
 			FilterRow filter = new FilterRow(header.size());
-			filter.add(new Label(MESSAGES.filter()));
+			Label label = new Label(MESSAGES.filter());
+			filter.add(label);
 			final ListBox box = new ListBox();
+			label.getElement().setId(DOM.createUniqueId());
+			Roles.getListboxRole().setAriaLabelledbyProperty(box.getElement(), Id.of(label.getElement()));
 			for (int i = 0; i < SectioningCookie.EnrollmentFilter.values().length; i++) {
 				SectioningCookie.EnrollmentFilter x = SectioningCookie.EnrollmentFilter.values()[i];
 				box.addItem(CONSTANTS.enrollmentFilterValues()[i], x.name());
@@ -1673,6 +1685,8 @@ public class EnrollmentTable extends Composite {
 					iEnrollments.sort(h, new EnrollmentComparator(asc ? subpart : subpart.substring(1), SectioningCookie.getInstance().getShowClassNumbers()), asc);
 			}
 		}
+		
+		iEnrollmentPanel.getRowFormatter().setVisible(iEnrollmentsLine, true);
 	}
 	
 	private static interface SetColSpan extends HasColSpan {

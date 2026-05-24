@@ -35,6 +35,7 @@ import org.unitime.timetable.gwt.resources.GwtResources;
 import org.unitime.timetable.gwt.shared.EventInterface.FilterRpcResponse;
 import org.unitime.timetable.gwt.shared.RoomInterface.FeatureInterface;
 import org.unitime.timetable.gwt.shared.RoomInterface.RoomFeaturesColumn;
+import org.unitime.timetable.gwt.shared.RoomInterface.RoomPropertiesInterface;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.HTML;
@@ -53,9 +54,10 @@ public class RoomFeaturesTable extends UniTimeTable<FeatureInterface> {
 	
 	private RoomFeaturesColumn iSortBy = null;
 	private boolean iAsc = true;
+	private RoomPropertiesInterface iProperties = null;
 	
 	public RoomFeaturesTable(boolean isGlobal) {
-		setStyleName("unitime-RoomFeatures");
+		addStyleName("unitime-RoomFeatures");
 		iGlobal = isGlobal;
 		
 		List<UniTimeTableHeader> header = new ArrayList<UniTimeTableHeader>();
@@ -95,6 +97,8 @@ public class RoomFeaturesTable extends UniTimeTable<FeatureInterface> {
 		
 		setSortBy(RoomCookie.getInstance().getRoomGroupsSortBy());
 	}
+	
+	public void setProperties(RoomPropertiesInterface props) { iProperties = props; }
 	
 	protected void doSort(RoomFeaturesColumn column) {
 		if (column == iSortBy) {
@@ -180,7 +184,7 @@ public class RoomFeaturesTable extends UniTimeTable<FeatureInterface> {
 				return type;
 			}
 		case DEPARTMENT:
-			return new DepartmentCell(true, feature.getDepartment());
+			return new DepartmentCell(true, iProperties, feature.getDepartment());
 		case DESCRIPTION:
 			if (feature.hasDescription()) {
 				HTML html = new HTML(feature.getDescription());
@@ -212,9 +216,9 @@ public class RoomFeaturesTable extends UniTimeTable<FeatureInterface> {
 		}
 		
 		int row = addRow(feature, widgets);
-		getRowFormatter().setStyleName(row, "row");
+		getRowFormatter().addStyleName(row, "row");
 		for (int col = 0; col < getCellCount(row); col++)
-			getCellFormatter().setStyleName(row, col, "cell");
+			getCellFormatter().addStyleName(row, col, "cell");
 		
 		return row;
 	}
@@ -254,6 +258,7 @@ public class RoomFeaturesTable extends UniTimeTable<FeatureInterface> {
 		for (int i = 1; i < getRowCount(); i++) {
 			if (featureId.equals(getData(i).getId())) {
 				ToolBox.scrollToElement(getRowFormatter().getElement(i));
+				ToolBox.focusOnRow(getRowFormatter().getElement(i));
 				return;
 			}
 		}

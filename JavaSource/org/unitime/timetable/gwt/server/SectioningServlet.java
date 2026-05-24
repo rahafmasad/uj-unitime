@@ -479,10 +479,10 @@ public class SectioningServlet implements SectioningService, DisposableBean {
 						if (rule.isDisjunctive()) {
 							if (rule.hasCourseName() && rule.matchesCourseName(c.getCourseName())) {
 							} else if (rule.hasCourseType() && rule.matchesCourseType(c.getCourseType())) {
-							} else if (rule.hasInstructionalMethod() && rule.matchesInstructionalMethod(config.getInstructionalMethod())) {
+							} else if (rule.hasInstructionalMethod() && rule.matchesInstructionalMethod(config.getEffectiveInstructionalMethod())) {
 							} else { imAvailable = false; }
 						} else {
-							if (!rule.matchesInstructionalMethod(config.getInstructionalMethod())) { imAvailable = false; }
+							if (!rule.matchesInstructionalMethod(config.getEffectiveInstructionalMethod())) { imAvailable = false; }
 						}
 					}
 					if (imAvailable) {
@@ -658,10 +658,10 @@ public class SectioningServlet implements SectioningService, DisposableBean {
 					if (rule.isDisjunctive()) {
 						if (rule.hasCourseName() && rule.matchesCourseName(courseOffering.getCourseName())) {
 						} else if (rule.hasCourseType() && rule.matchesCourseType(courseOffering.getCourseType())) {
-						} else if (rule.hasInstructionalMethod() && rule.matchesInstructionalMethod(config.getInstructionalMethod())) {
+						} else if (rule.hasInstructionalMethod() && rule.matchesInstructionalMethod(config.getEffectiveInstructionalMethod())) {
 						} else { imAvailable = false; }
 					} else {
-						if (!rule.matchesInstructionalMethod(config.getInstructionalMethod())) { imAvailable = false; }
+						if (!rule.matchesInstructionalMethod(config.getEffectiveInstructionalMethod())) { imAvailable = false; }
 					}
 				}
 				if (imAvailable)
@@ -723,6 +723,8 @@ public class SectioningServlet implements SectioningService, DisposableBean {
 					a.setExternalId(clazz.getSchedulingSubpart().getItypeDesc().trim() + " " + clazz.getSectionNumberString());
 				a.setClassNumber(clazz.getSectionNumberString(hibSession));
 				a.addNote(clazz.getSchedulePrintNote());
+				a.setDisclaimer(clazz.getSchedulingSubpart().getInstrOfferingConfig().getSchedulingDisclaimer());
+				a.addNote(clazz.getSchedulingSubpart().getInstrOfferingConfig().getSchedulingDisclaimer());
 
 				Assignment ass = clazz.getCommittedAssignment();
 				Placement p = (ass == null ? null : ass.getPlacement());
@@ -926,7 +928,7 @@ public class SectioningServlet implements SectioningService, DisposableBean {
 				}
 				throw new SectioningException(MSG.exceptionCourseDoesNotExist(course));
 			}
-			return server.getCourseDetails(c.getCourseId(), getCourseDetailsProvider());
+			return server.getCourseDetails(c.getCourseId());
 		}
 	}
 	
@@ -1764,12 +1766,16 @@ public class SectioningServlet implements SectioningService, DisposableBean {
 								if (clazz.getParentSection() == null)
 									clazz.setParentSection(enrollment.getClazz().getParentClass().getSectionNumberString(hibSession));
 							}
-							if (enrollment.getCourseOffering().getScheduleBookNote() != null)
+							if (enrollment.getCourseOffering().getScheduleBookNote() != null && course.getClassAssignments().size() == 1)
 								clazz.addNote(enrollment.getCourseOffering().getScheduleBookNote());
 							if (enrollment.getClazz().getSchedulePrintNote() != null)
 								clazz.addNote(enrollment.getClazz().getSchedulePrintNote());
 							if (attendance != null)
 								clazz.addNote(attendance.getClassNote(clazz.getExternalId()));
+							if (course.getClassAssignments().size() == 1) {
+								clazz.setDisclaimer(enrollment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getSchedulingDisclaimer());
+								clazz.addNote(enrollment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getSchedulingDisclaimer());
+							}
 							Placement placement = enrollment.getClazz().getCommittedAssignment() == null ? null : enrollment.getClazz().getCommittedAssignment().getPlacement();
 							int minLimit = enrollment.getClazz().getExpectedCapacity();
 		                	int maxLimit = enrollment.getClazz().getMaxExpectedCapacity();

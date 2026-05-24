@@ -35,6 +35,7 @@ import org.unitime.timetable.gwt.command.client.GwtRpcResponseList;
 import org.unitime.timetable.gwt.command.client.GwtRpcResponseNull;
 import org.unitime.timetable.gwt.shared.EventInterface.EventServiceProviderInterface;
 import org.unitime.timetable.gwt.shared.EventInterface.FilterRpcResponse;
+import org.unitime.timetable.gwt.shared.TableInterface.NaturalOrderComparator;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -819,7 +820,7 @@ public class RoomInterface implements IsSerializable {
 		}
 	}
 	
-	public static class RoomPropertyInterface implements GwtRpcResponse {
+	public static class RoomPropertyInterface implements GwtRpcResponse, Comparable<RoomPropertyInterface> {
 		private Long iId;
 		private String iAbbv;
 		private String iLabel;
@@ -866,6 +867,15 @@ public class RoomInterface implements IsSerializable {
 		public boolean equals(Object object) {
 			if (object == null || !(object instanceof RoomPropertyInterface)) return false;
 			return getId().equals(((RoomPropertyInterface)object).getId());
+		}
+
+		@Override
+		public int compareTo(RoomPropertyInterface r) {
+			int cmp = NaturalOrderComparator.compare(getLabel() == null ? "" : getLabel(), r.getLabel() == null ? "" : r.getLabel());
+			if (cmp != 0) return cmp;
+			cmp = NaturalOrderComparator.compare(getAbbreviation() == null ? "" : getAbbreviation(), r.getAbbreviation() == null ? "" : r.getAbbreviation());
+			if (cmp != 0) return cmp;
+			return getId().compareTo(r.getId());
 		}
 	}
 	
@@ -957,6 +967,14 @@ public class RoomInterface implements IsSerializable {
 		private PreferenceInterface iPreference;
 		private boolean iCanEditRoomSharing = false;
 		
+		public static enum DeptMode implements IsSerializable {
+			CODE,
+			ABBV,
+			NAME,
+			ABBV_NAME,
+			CODE_NAME,
+		}
+		
 		public DepartmentInterface() {
 			super();
 		}
@@ -985,6 +1003,43 @@ public class RoomInterface implements IsSerializable {
 		
 		public boolean isCanEditRoomSharing() { return iCanEditRoomSharing; }
 		public void setCanEditRoomSharing(boolean canEditRoomSharing) { iCanEditRoomSharing = canEditRoomSharing; }
+		
+		public String toString(DeptMode mode, boolean ext) {
+			switch (mode) {
+			case ABBV:
+				return ext ? getExtAbbreviationWhenExist() : getAbbreviationOrCode();
+			case CODE:
+				return getDeptCode();
+			case ABBV_NAME:
+				return ext ? getExtAbbreviationWhenExist() + " - " + getExtLabelWhenExist() : getAbbreviationOrCode() + " - " + getLabel();
+			case CODE_NAME:
+				return ext ? getDeptCode() + " - " + getExtLabelWhenExist() : getDeptCode() + " - " + getLabel();
+			case NAME:
+				return ext ? getExtLabelWhenExist() : getLabel();
+			default:
+				return getDeptCode();
+			}
+		}
+		
+		public String toString(DeptMode mode) {
+			return toString(mode, true);
+		}
+		
+		@Override
+		public String toString() {
+			return toString(DeptMode.CODE_NAME);
+		}
+		
+		public int compareTo(DepartmentInterface r, DeptMode mode) {
+			int cmp = toString(mode).compareTo(r.toString(mode));
+			if (cmp != 0) return cmp;
+			return super.compareTo(r);
+		}
+		
+		@Override
+		public int compareTo(RoomPropertyInterface r) {
+			return compareTo((DepartmentInterface)r, DeptMode.CODE_NAME);
+		}
 	}
 	
 	public static class FeatureInterface extends RoomPropertyInterface {
@@ -1661,18 +1716,25 @@ public class RoomInterface implements IsSerializable {
 	
 	public static class PreferenceInterface implements IsSerializable {
 		private String iCode, iName, iAbbv;
-		private String iColor;
+		private String iColor, iBgColor;
+		private String iStyle;
 		private Long iId;
 		private boolean iEditable;
 		
 		public PreferenceInterface() {}
-		public PreferenceInterface(Long id, String color, String code, String name, String abbv, boolean editable) {
-			iId = id; iColor = color; iCode = code; iName = name; iAbbv = abbv; iEditable = editable;
+		public PreferenceInterface(Long id, String color, String bgColor, String code, String name, String abbv, boolean editable, String style) {
+			iId = id; iColor = color; iBgColor = bgColor; iCode = code; iName = name; iAbbv = abbv; iEditable = editable; iStyle = style;
+		}
+		public PreferenceInterface(Long id, String color, String bgColor, String code, String name, String abbv, boolean editable) {
+			this(id, color, bgColor, code, name, abbv, editable, null);
 		}
 		
 		public String getColor() { return iColor; }
 		public void setColor(String color) { iColor = color; }
-		
+
+		public String getBgColor() { return iBgColor; }
+		public void setBgColor(String color) { iBgColor = color; }
+
 		public String getCode() { return iCode; }
 		public void setCode(String code) { iCode = code; }
 
@@ -1687,6 +1749,10 @@ public class RoomInterface implements IsSerializable {
 		
 		public void setEditable(boolean editable) { iEditable = editable; }
 		public boolean isEditable() { return iEditable; }
+		
+		public boolean hasStyle() { return iStyle != null && !iStyle.isEmpty(); }
+		public void setStyle(String style) { iStyle = style; }
+		public String getStyle() { return iStyle; }
 
 		@Override
 		public boolean equals(Object o) {
@@ -2068,6 +2134,7 @@ public class RoomInterface implements IsSerializable {
 		private List<AttachmentTypeInterface> iPictureTypes = new ArrayList<AttachmentTypeInterface>();
 		private boolean iCanSeeCourses = false, iCanSeeExams = false, iCanSeeEvents = false;
 		private boolean iGridAsText = false, iHorizontal = false;
+		private boolean iHighContrastColors = false;
 		private List<RoomSharingDisplayMode> iModes;
 		private String iEllipsoid = null;
 		private boolean iCanChangeAvailability = false, iCanChangeControll = false, iCanChangeExternalId = false, iCanChangeExamStatus = false,
@@ -2203,6 +2270,9 @@ public class RoomInterface implements IsSerializable {
 		
 		public boolean isGridAsText() { return iGridAsText; }
 		public void setGridAsText(boolean gridAsText) { iGridAsText = gridAsText; }
+		
+		public boolean isHighContrastColors() { return iHighContrastColors; }
+		public void setHighContrastColors(boolean highContrastColors) { iHighContrastColors = highContrastColors; }
 		
 		public boolean isHorizontal() { return iHorizontal; }
 		public void setHorizontal(boolean horizontal) { iHorizontal = horizontal; }

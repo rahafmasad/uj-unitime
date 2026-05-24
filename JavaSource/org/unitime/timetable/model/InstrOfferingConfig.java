@@ -358,5 +358,9 @@ public class InstrOfferingConfig extends BaseInstrOfferingConfig {
 		deptSet.add(this.getInstructionalOffering().getEffectiveFundingDept());
 		return deptSet;
 	}
+	
+	public boolean hasSchedulingDisclaimer() {
+		return getSchedulingDisclaimer() != null && !getSchedulingDisclaimer().isEmpty();
+	}
 
 }

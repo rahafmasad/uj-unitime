@@ -39,9 +39,11 @@ import org.unitime.timetable.model.InstructionalOffering;
 import org.unitime.timetable.model.PreferenceGroup;
 import org.unitime.timetable.model.PreferenceLevel;
 import org.unitime.timetable.model.SchedulingSubpart;
+import org.unitime.timetable.model.Session;
 import org.unitime.timetable.model.SubjectArea;
 import org.unitime.timetable.onlinesectioning.OnlineSectioningServer;
 import org.unitime.timetable.onlinesectioning.custom.CustomStudentEnrollmentHolder;
+import org.unitime.timetable.onlinesectioning.custom.Customization;
 import org.unitime.timetable.onlinesectioning.model.XCourseRequest;
 import org.unitime.timetable.security.UserContext;
 import org.unitime.timetable.security.rights.Right;
@@ -385,6 +387,9 @@ public class CoursePermissions {
 		@Override
 		public Class<InstrOfferingConfig> type() { return InstrOfferingConfig.class; }
 	}
+	
+	@PermissionForRight(Right.InstrOfferingConfigEditDisclaimer)
+	public static class InstrOfferingConfigEditDisclaimer extends InstrOfferingConfigAdd {}
 	
 	@PermissionForRight(Right.InstrOfferingConfigAdd)
 	public static class InstrOfferingConfigAdd implements Permission<InstructionalOffering> {
@@ -1091,5 +1096,18 @@ public class CoursePermissions {
 
 		@Override
 		public Class<Class_> type() { return Class_.class; }
+	}
+
+	@PermissionForRight(Right.CourseCatalog)
+	public static class CourseCatalog implements Permission<Session> {
+		@Autowired PermissionSession permissionSession;
+
+		@Override
+		public boolean check(UserContext user, Session source) {
+			return permissionSession.check(user, source) && Customization.CourseDetailsProvider.getProvider() != null;
+		}
+
+		@Override
+		public Class<Session> type() { return Session.class; }
 	}
 }

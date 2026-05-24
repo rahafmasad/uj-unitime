@@ -78,7 +78,7 @@ public class CourseFinderCourses extends P implements CourseFinder.CourseFinderT
 	private ScrollPanel iCoursesPanel;
 	private Label iCoursesTip;
 	private AriaTabBar iCourseDetailsTabBar;
-	private ScrollPanel iCourseDetailsPanel;
+	private FocusableScrollPanel iCourseDetailsPanel;
 	private Map<Character, Integer> iTabAccessKeys = new HashMap<Character, Integer>();
 	private CourseFinderCourseDetails[] iDetails = null;
 	protected String iLastQuery = null;
@@ -132,6 +132,7 @@ public class CourseFinderCourses extends P implements CourseFinder.CourseFinderT
 		iCoursesPanel = new ScrollPanel(iCourses);
 		iCoursesPanel.setStyleName("unitime-ScrollPanel");
 		iCoursesPanel.addStyleName("course-table");
+		iCoursesPanel.getElement().setTabIndex(0);
 		
 		iCoursesTip = new Label(CONSTANTS.courseTips()[(int)(Math.random() * CONSTANTS.courseTips().length)]);
 		iCoursesTip.setStyleName("unitime-Hint");
@@ -148,7 +149,7 @@ public class CourseFinderCourses extends P implements CourseFinder.CourseFinderT
 		
 		iCourseDetailsTabBar = new AriaTabBar();
 		iCourseDetailsTabBar.addStyleName("course-details-tabs");
-		iCourseDetailsPanel = new ScrollPanel();
+		iCourseDetailsPanel = new FocusableScrollPanel();
 		iCourseDetailsPanel.addStyleName("course-details");
 		iCourseDetailsTabBar.addSelectionHandler(new SelectionHandler<Integer>() {
 			@Override
@@ -477,6 +478,7 @@ public class CourseFinderCourses extends P implements CourseFinder.CourseFinderT
 		}
 		if (event.getTypeInt() == Event.ONKEYDOWN) {
 			if (iCourses.getRowCount() < 2 || iCourses.getData(1) == null) return;
+			if (iCourseDetailsPanel != null && iCourseDetailsPanel.isFocused()) return;
 			int row = iCourses.getSelectedRow();
 			if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_DOWN && isEnabled()) {
 				if (row < 0 || iCourses.getSelectedRow() + 1 >= iCourses.getRowCount())

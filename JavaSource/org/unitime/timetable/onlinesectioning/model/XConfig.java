@@ -50,6 +50,7 @@ public class XConfig implements Serializable, Comparable<XConfig>, Externalizabl
     private int iLimit = -1;
     private List<XSubpart> iSubparts = new ArrayList<XSubpart>();
     private XInstructionalMethod iInstructionalMethod = null;
+    private String iSchedulingDisclaimer = null;
 
     public XConfig() {
     }
@@ -77,6 +78,7 @@ public class XConfig implements Serializable, Comparable<XConfig>, Externalizabl
     	Collections.sort(iSubparts, new XSubpartComparator());
     	if (config.getEffectiveInstructionalMethod() != null)
     		iInstructionalMethod = new XInstructionalMethod(config.getEffectiveInstructionalMethod());
+    	iSchedulingDisclaimer = config.getSchedulingDisclaimer();
     }
     
     public XConfig(Config config) {
@@ -106,6 +108,15 @@ public class XConfig implements Serializable, Comparable<XConfig>, Externalizabl
     	for (XSubpart subpart: iSubparts)
     		if (subpart.getSubpartId().equals(subpartId))
     			return subpart;
+    	return null;
+    }
+    
+    public XSection getSection(Long sectionId) {
+    	if (sectionId == null) return null;
+    	for (XSubpart subpart: iSubparts)
+    		for (XSection section: subpart.getSections())
+    			if (section.getSectionId().equals(sectionId))
+    				return section;
     	return null;
     }
     
@@ -141,6 +152,10 @@ public class XConfig implements Serializable, Comparable<XConfig>, Externalizabl
     public XInstructionalMethod getInstructionalMethod() {
     	return iInstructionalMethod;
     }
+    
+    public String getSchedulingDisclaimer() { return iSchedulingDisclaimer; }
+    public boolean hasSchedulingDisclaimer() { return iSchedulingDisclaimer != null && !iSchedulingDisclaimer.isEmpty(); }
+    
 
     @Override
     public String toString() {
@@ -198,6 +213,8 @@ public class XConfig implements Serializable, Comparable<XConfig>, Externalizabl
 
 		if (in.readBoolean())
 			iInstructionalMethod = new XInstructionalMethod(in);
+
+		iSchedulingDisclaimer = (String)in.readObject();
 	}
 
 	@Override
@@ -214,5 +231,7 @@ public class XConfig implements Serializable, Comparable<XConfig>, Externalizabl
 		out.writeBoolean(iInstructionalMethod != null);
 		if (iInstructionalMethod != null)
 			iInstructionalMethod.writeExternal(out);
+		
+		out.writeObject(iSchedulingDisclaimer);
 	}
 }

@@ -860,6 +860,12 @@ public class CourseRequestInterface extends StudentSectioningContext implements 
 		public boolean isEmpty() { return !isCourse() && !isFreeTime(); }
 		
 		public boolean hasSelectedIntructionalMethods() { return iSelectedIntructionalMethods != null && !iSelectedIntructionalMethods.isEmpty(); }
+		public boolean hasRequiredIntructionalMethods() {
+			if (iSelectedIntructionalMethods != null)
+				for (Preference p: iSelectedIntructionalMethods)
+					if (p.isRequired()) return true;
+			return false;
+		}
 		public Set<Preference> getSelectedIntructionalMethods() { return iSelectedIntructionalMethods; }
 		public void setSelectedIntructionalMethod(Long id, String text, boolean required, boolean value) {
 			setSelectedIntructionalMethod(new Preference(id, text, required), value);
@@ -902,6 +908,12 @@ public class CourseRequestInterface extends StudentSectioningContext implements 
 		}
 		
 		public boolean hasSelectedClasses() { return iSelectedClasses != null && !iSelectedClasses.isEmpty(); }
+		public boolean hasRequiredClasses() {
+			if (iSelectedClasses != null)
+				for (Preference p: iSelectedClasses)
+					if (p.isRequired()) return true;
+			return false;
+		}
 		public Set<Preference> getSelectedClasses() { return iSelectedClasses; }
 		public void setSelectedClasses(Set<Preference> classes) { 
 			if (iSelectedClasses == null)
@@ -1557,7 +1569,8 @@ public class CourseRequestInterface extends StudentSectioningContext implements 
 		public boolean hasMessages() { return iMessages != null && !iMessages.isEmpty(); }
 		public Set<CourseMessage> getMessages() { return iMessages; }
 		public void addMessage(CourseMessage message) {
-			iMessages.add(message);
+			if (message.getMessage() != null)
+				iMessages.add(message);
 		}
 		
 		public CourseMessage addMessage(Long courseId, String course, String code, String message, Integer confirm, int order) {
@@ -1865,7 +1878,9 @@ public class CourseRequestInterface extends StudentSectioningContext implements 
 				cmp = getCourse().compareTo(m.getCourse());
 				if (cmp != 0) return cmp;
 			}
-			return getCode().compareTo(m.getCode());
+			cmp = getCode().compareTo(m.getCode());
+			if (cmp != 0) return cmp;
+			return getMessage().compareTo(m.getMessage());
 		}
 	}
 	

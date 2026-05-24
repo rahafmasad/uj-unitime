@@ -43,6 +43,7 @@ import org.unitime.timetable.gwt.shared.ClassSetupInterface.ClassSetupColumn;
 import org.unitime.timetable.gwt.shared.ClassSetupInterface.Operation;
 import org.unitime.timetable.gwt.shared.ClassSetupInterface.Reference;
 
+import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -61,6 +62,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -232,6 +234,7 @@ public class MultipleClassSetupPage extends Composite {
 			});
 		} else if (Boolean.TRUE.equals(iData.isUnlimited())) {
 			Image on = new Image(RESOURCES.on()); on.setTitle(MESSAGES.titleUnlimitedEnrollment());
+			on.setAltText(MESSAGES.titleUnlimitedEnrollment());
 			iForm.addRow(MESSAGES.propertyUnlimitedEnrollment(), on);
 		}
 		iLimit = new NumberBox();
@@ -244,6 +247,67 @@ public class MultipleClassSetupPage extends Composite {
 			}
 		});
 		iLimitRow = iForm.addRow(MESSAGES.propertyConfigurationLimit(), iLimit);
+		
+		if (iData.isCanEditSchedulingDisclaimer()) {
+			P disclaimerPanel = null;
+			final TextArea disclaimer = new TextArea();
+			Roles.getTextboxRole().setAriaLabelProperty(disclaimer.getElement(), MESSAGES.itemCustomSchedulingDisclaimer());
+			disclaimer.setHeight("66px");
+			disclaimer.setWidth("100%");
+			if (iData.hasStdSchedDisclaimers()) {
+				disclaimerPanel = new P("scheduling-disclaimer");
+				ListBox box = new ListBox();
+				for (final Reference r: iData.getStdSchedDisclaimers()) {
+					box.addItem(r.getReference(), r.getId().toString());
+					if (iData.hasSchedulingDisclaimer() && iData.getSchedulingDisclaimer().equals(r.getLabel()))
+						box.setSelectedIndex(box.getItemCount() - 1);
+				}
+				if (box.getSelectedIndex() <= 0) {
+					if (iData.hasSchedulingDisclaimer()) {
+						box.setSelectedIndex(box.getItemCount() - 1);
+					} else {
+						disclaimer.setEnabled(false); disclaimer.setVisible(false);
+					}
+				} else {
+					disclaimer.setEnabled(false);
+				}
+				box.addChangeHandler(new ChangeHandler() {
+					@Override
+					public void onChange(ChangeEvent event) {
+						Reference disc = iData.getStdSchedDisclaimer(Long.valueOf(box.getSelectedValue()));
+						if (disc.getId() == -1l) {
+							disclaimer.setEnabled(false); disclaimer.setVisible(false);
+							disclaimer.setText("");
+							iData.setSchedulingDisclaimer(null);
+						} else if (disc.getId() == -2l) {
+							disclaimer.setEnabled(true); disclaimer.setVisible(true);
+						} else {
+							disclaimer.setEnabled(false); disclaimer.setVisible(true);
+							disclaimer.setText(disc.getLabel());
+							iData.setSchedulingDisclaimer(disc.getLabel());
+						}
+					}
+				});
+				disclaimerPanel.add(box);
+			}
+			if (iData.hasSchedulingDisclaimer()) disclaimer.setText(iData.getSchedulingDisclaimer());
+			if (disclaimerPanel == null)
+				iForm.addRow(MESSAGES.propertySchedulingDisclaimer(), disclaimer);
+			else {
+				disclaimerPanel.add(disclaimer);
+				iForm.addRow(MESSAGES.propertySchedulingDisclaimer(), disclaimerPanel);
+			}
+			disclaimer.addValueChangeHandler(new ValueChangeHandler<String>() {
+				@Override
+				public void onValueChange(ValueChangeEvent<String> event) {
+					iData.setSchedulingDisclaimer(event.getValue());
+				}
+			});
+		} else if (iData.hasSchedulingDisclaimer()) {
+			Label disclaimer = new Label(iData.getSchedulingDisclaimer());
+			disclaimer.addStyleName("note");
+			iForm.addRow(MESSAGES.propertySchedulingDisclaimer(), disclaimer);
+		}
 		
 		P topSubpartLimits = new P("subpart-limits");
 		P bottomSubpartLimits = new P("subpart-limits");
@@ -485,8 +549,8 @@ public class MultipleClassSetupPage extends Composite {
 			iSubpartId = subpartId;
 			iTopCounter = new Label("0"); iTopCounter.addStyleName("subpart-counter");
 			iBottomCounter = new Label("0"); iBottomCounter.addStyleName("subpart-counter");
-			iTopStudentScheduling = new CheckBox();
-			iBottomStudentScheduling = new CheckBox();
+			iTopStudentScheduling = new CheckBox(MESSAGES.propertyEnabledForStudentScheduling());
+			iBottomStudentScheduling = new CheckBox(MESSAGES.propertyEnabledForStudentScheduling());
 			iBottomStudentScheduling.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -503,8 +567,8 @@ public class MultipleClassSetupPage extends Composite {
 					updateTable();
 				}
 			});
-			iTopDisplayInstructors = new CheckBox();
-			iBottomDisplayInstructors = new CheckBox();
+			iTopDisplayInstructors = new CheckBox(MESSAGES.propertyDisplayInstructors());
+			iBottomDisplayInstructors = new CheckBox(MESSAGES.propertyDisplayInstructors());
 			iBottomDisplayInstructors.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 				@Override
 				public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -650,13 +714,9 @@ public class MultipleClassSetupPage extends Composite {
 			iTop.add(label);
 			iTop.add(iTopCounter);
 			if (iData.isDisplayInstructors() && nbrEditable > 0) {
-				label = new P("display-instructors-label"); label.setText(MESSAGES.propertyDisplayInstructors());
-				iTop.add(label);
 				iTop.add(iTopDisplayInstructors);
 			}
 			if (iData.isDisplayEnabledForStudentScheduling() && nbrEditable > 0) {
-				label = new P("student-scheduling-label"); label.setText(MESSAGES.propertyEnabledForStudentScheduling());
-				iTop.add(label);
 				iTop.add(iTopStudentScheduling);
 			}
 
@@ -666,13 +726,9 @@ public class MultipleClassSetupPage extends Composite {
 			iBottom.add(label);
 			iBottom.add(iBottomCounter);
 			if (iData.isDisplayInstructors() && nbrEditable > 0) {
-				label = new P("display-instructors-label"); label.setText(MESSAGES.propertyDisplayInstructors());
-				iBottom.add(label);
 				iBottom.add(iBottomDisplayInstructors);
 			}
 			if (iData.isDisplayEnabledForStudentScheduling() && nbrEditable > 0) {
-				label = new P("student-scheduling-label"); label.setText(MESSAGES.propertyEnabledForStudentScheduling());
-				iBottom.add(label);
 				iBottom.add(iBottomStudentScheduling);
 			}
 		}

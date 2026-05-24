@@ -64,8 +64,6 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 	
 	public DataTable(TableInterface table) {
 		addStyleName("unitime-DataTable");
-		if (table != null)
-			populate(table);
 		addMouseClickListener(new MouseClickListener<TableInterface.TableRowInterface>() {
 			@Override
 			public void onMouseClick(UniTimeTable.TableEvent<TableRowInterface> event) {
@@ -79,6 +77,8 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 				}
 			}
 		});
+		if (table != null)
+			populate(table);
 	}
 	
 	public void populate(TableInterface table) {
@@ -132,7 +132,7 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 			}
 			int rowIdx = addRow(row, line);
 			if (row.isSelected()) {
-				getRowFormatter().setStyleName(rowIdx, "unitime-TableRowSelected");
+				getRowFormatter().addStyleName(rowIdx, "unitime-TableRowSelected");
 			}
 		}
 		for (int i = 0; i < table.getHeader().length; i++)
@@ -147,7 +147,7 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 			iHeader = header;
 			if (cell.hasStyleName()) addStyleName(cell.getStyleName());
 			if (cell.isUnderlined()) addStyleName("underlined");
-			if (cell.hasColor()) getElement().getStyle().setColor(cell.getColor());
+			if (cell.hasColor() && !cell.hasStyleName()) getElement().getStyle().setColor(cell.getColor());
 			if (cell instanceof TableInterface.TableCellTime) {
 				final TableInterface.TableCellTime time = (TableInterface.TableCellTime)cell;
 				if (time.hasId()) {
@@ -171,7 +171,11 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 				for (int index = 0; index < rooms.getNrRooms(); index++) {
 					final P room = new P("item");
 					room.setText(rooms.getName(index) + (index + 1 < rooms.getNrRooms() ? "," : ""));
-					room.getElement().getStyle().setColor(rooms.getColor(index));
+					if (rooms.hasStyleName(index)) {
+						room.addStyleName(rooms.getStyleName(index));
+					} else {
+						room.getElement().getStyle().setColor(rooms.getColor(index));
+					}
 					final String id = rooms.getId(index);
 					final String preference = rooms.getPreference(index);
 					if (id != null) {
@@ -219,7 +223,7 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 					final P chunk = new P("chunk");
 					TableCellInterface<?> m = multi.get(index);
 					if (m.hasStyleName()) chunk.addStyleName(m.getStyleName());
-					if (m.hasColor()) chunk.getElement().getStyle().setColor(m.getColor());
+					else if (m.hasColor()) chunk.getElement().getStyle().setColor(m.getColor());
 					chunk.setText(m.getFormattedValue());
 					add(chunk);
 				}
@@ -247,10 +251,13 @@ public class DataTable extends UniTimeTable<TableInterface.TableRowInterface> im
 			}
 			if (cell instanceof TableInterface.TableCellBoolean) {
 				Boolean value = ((TableInterface.TableCellBoolean)cell).getValue();
-				if (value != null && value.booleanValue())
-					add(new Image(RESOURCES.on()));
-				else if (value != null && !value.booleanValue())
-					add(new Image(RESOURCES.off()));
+				if (value != null && value.booleanValue()) {
+					Image img = new Image(RESOURCES.on()); img.setAltText(MESSAGES.exportTrue());
+					add(img);
+				} else if (value != null && !value.booleanValue()) {
+					Image img = new Image(RESOURCES.off()); img.setAltText(MESSAGES.exportFalse());
+					add(img);
+				}
 				else
 					setHTML(cell.getFormattedValue());
 			} else {

@@ -183,7 +183,7 @@ public class InstructorsTableBuilder extends TableBuilder{
 			for (TimePref tp: di.getTimePreferences()) {
 				RequiredTimeTable rtt = tp.getRequiredTimeTable();
 				if (getGridAsText()) {
-					timePref.add(rtt.getModel().toString().replace(", ", "\n"))
+					timePref.addItem(rtt.getModel().toCell(isUsePrefStyles()))
 						.setMouseOver("$wnd.showGwtInstructorAvailabilityHint($wnd.lastMouseOverElement, '" + di.getUniqueId() + "');")
 						.setMouseOut("$wnd.hideGwtInstructorAvailabilityHint();");
 				} else {
@@ -227,9 +227,15 @@ public class InstructorsTableBuilder extends TableBuilder{
 			if (hasTeachPref) {
 				PreferenceLevel pref = di.getTeachingPreference();
 				if (pref == null) pref = PreferenceLevel.getPreferenceLevel(PreferenceLevel.sProhibited);
-				line.addCell(pref.getPrefName())
-					.setColor(PreferenceLevel.prolog2color(pref.getPrefProlog()))
-					.setComparable(pref.getPrefId());
+				if (isUsePrefStyles()) {
+					line.addCell().addItem(new CellInterface().setText(pref.getPrefName())
+						.setClassName("pref-" + PreferenceLevel.prolog2char(pref.getPrefProlog()))
+						.setComparable(pref.getPrefId()));
+				} else {
+					line.addCell(pref.getPrefName())
+						.setColor(PreferenceLevel.prolog2color(pref.getPrefProlog()))
+						.setComparable(pref.getPrefId());
+				}
 			}
 			
 			if (hasUnavailableDates)
@@ -264,7 +270,7 @@ public class InstructorsTableBuilder extends TableBuilder{
 	    		cl.setTitle(title);
 	    		if (c.isCancelled()) {
 	    			cl.addStyle("text-decoration: line-through;");
-	    			cl.setColor("gray");
+	    			cl.setColor("#6f6f6f");
 	    		}
 	    		if (ci.isLead())
 	    			cl.addStyle("font-weight:bold;");
@@ -302,7 +308,7 @@ public class InstructorsTableBuilder extends TableBuilder{
 						if (is.getSubmitted() != null) {
 							line.addCell(iDF.format(is.getSubmitted())).setComparable(is.getSubmitted().getTime());
 						} else {
-							line.addCell(MSG.instrSurveyNotSubmitted()).setComparable(0l).addStyle("font-style: italic;").setColor("#dcb414");
+							line.addCell(MSG.instrSurveyNotSubmitted()).setComparable(0l).addStyle("font-style: italic;").setColor("#8e740b");
 						}
 					} else {
 						line.addCell(MSG.instrSurveyNotFilled()).setComparable(-1l).addStyle("font-style: italic;").setColor("#c81e14");

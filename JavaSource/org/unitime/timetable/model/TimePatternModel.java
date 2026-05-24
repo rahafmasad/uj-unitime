@@ -36,6 +36,7 @@ import org.cpsolver.coursett.model.TimeLocation;
 import org.cpsolver.coursett.preference.MinMaxPreferenceCombination;
 import org.cpsolver.coursett.preference.PreferenceCombination;
 import org.unitime.localization.impl.Localization;
+import org.unitime.localization.messages.CourseMessages;
 import org.unitime.timetable.defaults.ApplicationProperty;
 import org.unitime.timetable.gwt.client.tables.TableInterface.CellInterface;
 import org.unitime.timetable.gwt.resources.GwtConstants;
@@ -49,6 +50,7 @@ import org.unitime.timetable.webutil.RequiredTimeTableModel;
  */
 public class TimePatternModel implements RequiredTimeTableModel {
 	protected static final GwtConstants CONSTANTS = Localization.create(GwtConstants.class);
+	protected static final CourseMessages MSG = Localization.create(CourseMessages.class);
 	private TimePattern iTimePattern = null;
 	private int iDefaultSelection = 0;
 	
@@ -592,12 +594,12 @@ public class TimePatternModel implements RequiredTimeTableModel {
                       sb.append(Constants.toTime(iMinutes[endTime] + getSlotsPerMtg()*Constants.SLOT_LENGTH_MIN - iBreakTime));
              	  }
                 }
-    		return sb.toString();
+    		return (iTimePattern == null ? "" : iTimePattern.getName() + ": ") + (sb.isEmpty() ? MSG.altNoPreferences() : sb.toString());
     	}
     }
     
 	@Override
-	public CellInterface toCell() {
+	public CellInterface toCell(boolean prefStyles) {
 		CellInterface cell = new CellInterface();
 		Integer firstDayOfWeek = ApplicationProperty.TimePatternFirstDayOfWeek.intValue();
 		if (isExactTime()) {
@@ -672,8 +674,12 @@ public class TimePatternModel implements RequiredTimeTableModel {
 						for (int b = j; b <= endTime; b++)
 							out[a][b] = true;
 					if (sb.length() > 0) {
-						cell.add(sb.toString()).setColor(PreferenceLevel.prolog2color(pref))
-								.setAria(PreferenceLevel.prolog2abbv(pref) + " " + sb).setInline(false);
+						CellInterface c = cell.add(sb.toString()).setAria(PreferenceLevel.prolog2abbv(pref) + " " + sb);
+						if (prefStyles) {
+							c.setClassName("pref-" + PreferenceLevel.prolog2char(pref));
+						} else {
+							c.setColor(PreferenceLevel.prolog2color(pref)).setInline(false);
+						}
 						sb = new StringBuffer();
 						pref = null;
 					}
@@ -719,8 +725,12 @@ public class TimePatternModel implements RequiredTimeTableModel {
 					}
 				}
 			if (sb.length() > 0) {
-				cell.add(sb.toString()).setColor(PreferenceLevel.prolog2color(pref))
-						.setAria(PreferenceLevel.prolog2abbv(pref) + " " + sb).setInline(false);
+				CellInterface c = cell.add(sb.toString()).setAria(PreferenceLevel.prolog2abbv(pref) + " " + sb);
+				if (prefStyles) {
+					c.setClassName("pref-" + PreferenceLevel.prolog2char(pref));
+				} else {
+					c.setColor(PreferenceLevel.prolog2color(pref)).setInline(false);
+				}
 			}
 			return cell;
 		}

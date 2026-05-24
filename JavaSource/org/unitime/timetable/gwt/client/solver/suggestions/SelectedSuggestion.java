@@ -59,6 +59,7 @@ public class SelectedSuggestion extends SimpleForm implements TakesValue<Suggest
 				iContext.assign(iSuggestion.getAssignment(true), iFooter);
 			}
 		});
+		setVisible(false);
 	}
 	
 	public UniTimeHeaderPanel getFooter() { return iFooter; }
@@ -67,6 +68,7 @@ public class SelectedSuggestion extends SimpleForm implements TakesValue<Suggest
 	public void setValue(Suggestion suggestion) {
 		iSuggestion = suggestion;
 		clear();
+		setVisible(false);
 		if (suggestion == null || !suggestion.hasDifferentAssignments()) return;
 		if (suggestion.hasDifferentAssignments()) {
 			AssignmentTable at = new AssignmentTable(iContext.getProperties(), false, true) {
@@ -75,41 +77,41 @@ public class SelectedSuggestion extends SimpleForm implements TakesValue<Suggest
 					iContext.remove(details.getClazz());
 				}
 			};
+			at.addMouseClickListener(new MouseClickListener<ClassAssignmentDetails>() {
+				@Override
+				public void onMouseClick(TableEvent<ClassAssignmentDetails> event) {
+					if (event.getData() != null) iContext.select(event.getData().getClazz());
+				}
+			});
 			for (ClassAssignmentDetails d: suggestion.getDifferentAssignments()) {
 				at.addRow(d);
 				if (d.hasConflict()) at.setColumnVisible(at.getCellIndex(AssignmentTable.AssignmentColumn.CONSTRAINT), true);
 			}
 			addHeaderRow(MESSAGES.headerSelectedAssignment());
 			addRow(at);
+		}
+		if (suggestion.hasUnresolvedConflicts()) {
+			AssignmentTable at = new AssignmentTable(iContext.getProperties(), true, false);
 			at.addMouseClickListener(new MouseClickListener<ClassAssignmentDetails>() {
 				@Override
 				public void onMouseClick(TableEvent<ClassAssignmentDetails> event) {
 					if (event.getData() != null) iContext.select(event.getData().getClazz());
 				}
 			});
-		}
-		if (suggestion.hasUnresolvedConflicts()) {
-			AssignmentTable at = new AssignmentTable(iContext.getProperties(), true, false);
 			for (ClassAssignmentDetails d: suggestion.getUnresolvedConflicts()) {
 				at.addRow(d);
 				if (d.hasConflict()) at.setColumnVisible(at.getCellIndex(AssignmentTable.AssignmentColumn.CONSTRAINT), true);
 			}
 			addHeaderRow(MESSAGES.headerConflictingAssignments());
 			addRow(at);
-			at.addMouseClickListener(new MouseClickListener<ClassAssignmentDetails>() {
-				@Override
-				public void onMouseClick(TableEvent<ClassAssignmentDetails> event) {
-					if (event.getData() != null) iContext.select(event.getData().getClazz());
-				}
-			});
 		}
 		if (suggestion.getUnassignedVariables() != suggestion.getBaseUnassignedVariables())
-			addRow(MESSAGES.propNotAssignedClasses(), new HTML(SuggestionsPageContext.dispNumber(suggestion.getUnassignedVariables(),suggestion.getBaseUnassignedVariables()), false));
+			addRow(MESSAGES.propNotAssignedClasses(), new HTML(iContext.dispNumber(suggestion.getUnassignedVariables(),suggestion.getBaseUnassignedVariables()), false));
 		for (String criterion: new TreeSet<String>(suggestion.getCriteria().keySet())) {
 			double value = suggestion.getCriterion(criterion);
 			double base = suggestion.getBaseCriterion(criterion);
 			if (value != base)
-				addRow(criterion + ":",new HTML(SuggestionsPageContext.dispNumber(value, base), false));
+				addRow(criterion + ":",new HTML(iContext.dispNumber(value, base), false));
 		}
 		/*
 		if (suggestion.getViolatedStudentConflicts() != suggestion.getBaseViolatedStudentConflicts())
@@ -137,14 +139,15 @@ public class SelectedSuggestion extends SimpleForm implements TakesValue<Suggest
 		if (suggestion.getPerturbationPenalty() != suggestion.getBasePerturbationPenalty())
 			addRow(MESSAGES.propPerturbationPenalty(), new HTML(SuggestionsPageContext.dispNumber(suggestion.getPerturbationPenalty(),suggestion.getBasePerturbationPenalty()), false));
 		*/
-		addRow(MESSAGES.propOverallSolutionValue(), new HTML(SuggestionsPageContext.dispNumber(suggestion.getValue(),suggestion.getBaseValue()), false));
+		addRow(MESSAGES.propOverallSolutionValue(), new HTML(iContext.dispNumber(suggestion.getValue(),suggestion.getBaseValue()), false));
 		if (suggestion.hasStudentConflicts())
 			addRow(MESSAGES.propStudentConflicts(), iContext.createStudentConflicts(suggestion.getStudentConflicts()));
 		if (suggestion.hasViolatedDistributionConflicts() || suggestion.hasBtbInstructorConflicts())
-			addRow(MESSAGES.propViolatedConstraints(), iContext.createViolatedConstraints(suggestion.getDistributionConflicts(), suggestion.getBtbInstructorConflicts()));
+			addRow(MESSAGES.propViolatedConstraints(), iContext.createViolatedConstraints(suggestion.getDistributionConflicts(), suggestion.getBtbInstructorConflicts(), false));
 		iFooter.setEnabled("assign", iSuggestion.isCanAssign());
 		iFooter.clearMessage();
 		addBottomRow(iFooter);
+		setVisible(true);
 	}
 
 	@Override

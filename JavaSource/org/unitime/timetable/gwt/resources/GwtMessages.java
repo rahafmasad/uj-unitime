@@ -36,10 +36,10 @@ public interface GwtMessages extends Messages {
 	@DefaultMessage("UniTime {0}")
 	String unitimeVersion(String version);
 	
-	@DefaultMessage("&copy; 2008 - 2025 The Apereo Foundation,<br>distributed under the Apache License, Version 2.")
+	@DefaultMessage("&copy; 2008 - 2026 The Apereo Foundation,<br>distributed under the Apache License, Version 2.")
 	String pageCopyright();
 	
-	@DefaultMessage("UniTime {0}, \u00A9 2008 - 2025 The Apereo Foundation, distributed under the Apache License.")
+	@DefaultMessage("UniTime {0}, \u00A9 2008 - 2026 The Apereo Foundation, distributed under the Apache License.")
 	String pdfCopyright(String version);
 	
 	@DefaultMessage("Oooops, the loading is taking too much time... Something probably went wrong. You may need to reload this page.")
@@ -635,6 +635,9 @@ public interface GwtMessages extends Messages {
 	
 	@DefaultMessage("Configuration / Class")
 	String colConfigOrClass();
+	
+	@DefaultMessage("Subpart")
+	String colSubpart();
 	
 	@DefaultMessage("Class Number")
 	String colClassNumber();
@@ -4040,6 +4043,18 @@ public interface GwtMessages extends Messages {
 	@DefaultMessage("Class Assignment")
 	@DoNotTranslate
 	String pageClassAssignment();
+	
+	@DefaultMessage("Course Catalog")
+	@DoNotTranslate
+	String pageCourseCatalog();
+	
+	@DefaultMessage("Standard Scheduling Disclaimer")
+	@DoNotTranslate
+	String pageStandardSchedulingDisclaimer();
+	
+	@DefaultMessage("Standard Scheduling Disclaimers")
+	@DoNotTranslate
+	String pageStandardSchedulingDisclaimers();
 
 	@DefaultMessage("N/A")
 	String itemNotApplicable();
@@ -4194,13 +4209,13 @@ public interface GwtMessages extends Messages {
 	@DefaultMessage("Midterms")
 	String hintMidterms();
 	
-	@DefaultMessage("<span title='Conflicting event' style='font-style:normal;' aria-label='Conflicting event'>&#9785;</span>")
+	@DefaultMessage("<span title='Conflicting event' style='font-style:normal;'>&#9785;</span>")
 	String signConflict();
 	
-	@DefaultMessage("<span title='Selected event' style='font-style:normal;' aria-label='Selected event'>&#9745;</span>")
+	@DefaultMessage("<span title='Selected event' style='font-style:normal;'>&#9745;</span>")
 	String signSelected();
 
-	@DefaultMessage("<span title='Warning' style='font-style:normal;' aria-label='Warning'>&#9888;</span>")
+	@DefaultMessage("<span title='Warning' style='font-style:normal;'>&#9888;</span>")
 	String signMessage();
 
 	@DefaultMessage("Event name is required.")
@@ -4425,10 +4440,10 @@ public interface GwtMessages extends Messages {
 	@DefaultMessage("{2}, {0} {1}")
 	String formatName(String first, String middle, String last);
 	
-	@DefaultMessage("from:<br><font color='gray'>to:</font>")
+	@DefaultMessage("from:<br><span style='color:#636363;'>to:</span>")
 	String roomSharingCorner();
 	
-	@DefaultMessage("{0}<br><font color='gray'>{1}</font>")
+	@DefaultMessage("{0}<br><span style='color:#636363;'>{1}</span>")
 	String roomSharingTimeHeader(String from, String to);
 	
 	@DefaultMessage("Horizontal")
@@ -8072,9 +8087,24 @@ public interface GwtMessages extends Messages {
 	@DefaultMessage("Student filter cannot remain empty.")
 	String hintReservationNoFilter();
 	
+	@DefaultMessage("Student filter is too long (over 512 characters).")
+	String hintReservationFilterTooLong();
+	
 	@DefaultMessage("(Link)")
 	String roomExternalLink();
 	
 	@DefaultMessage("\u2026 {0} more")
 	String moreItems(int count);
+	
+	@DefaultMessage("Disclaimer")
+	String fieldDisclaimer();
+	
+	@DefaultMessage("Instructors")
+	String colNbrInstr();
+	
+	@DefaultMessage("Include")
+	String colInclude();
+	
+	@DefaultMessage("Update")
+	String colUpdate();
 }

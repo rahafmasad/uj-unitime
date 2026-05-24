@@ -55,6 +55,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 public class OfferingDetailPage extends Composite {
@@ -278,6 +279,11 @@ public class OfferingDetailPage extends Composite {
 					for (final OfferingConfigInterface config: response.getConfigs()) {
 						UniTimeHeaderPanel hp = new UniTimeHeaderPanel(config.getName());
 						iPanel.addHeaderRow(hp);
+						if (config.hasSchedulingDisclaimer()) {
+							Label disclaimer = new Label(config.getSchedulingDisclaimer());
+							disclaimer.addStyleName("note");
+							iPanel.addRow(COURSE.propertySchedulingDisclaimer(), disclaimer);
+						}
 						iPanel.addRow(new TableWidget(config));
 						if (config.hasAnchor()) {
 							Anchor a = new Anchor(); a.setName(config.getAnchor()); a.getElement().setId(config.getAnchor());
@@ -355,11 +361,16 @@ public class OfferingDetailPage extends Composite {
 						String token = Window.Location.getHash();
 						if (token != null && (token.startsWith("#A") || token.equals("#back")) || token.startsWith("#ioc")) {
 							Element e = Document.get().getElementById(token.substring(1));
-							if (e != null) ToolBox.scrollToElement(e);
+							if (e != null) {
+								ToolBox.scrollToElement(e);
+								ToolBox.focusOnRow(e);
+							}
 						}
 						Element e = Document.get().getElementById("back");
-						if (e != null)
+						if (e != null) {
 							ToolBox.scrollToElement(e);
+							ToolBox.focusOnRow(e);
+						}
 						if (token.equals("#reservations") && iReservationsRow >= 0)
 							ToolBox.scrollToElement(iPanel.getRowFormatter().getElement(iReservationsRow));
 						if (token.equals("#instructors") && iTeachingRequestsRow >= 0)

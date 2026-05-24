@@ -57,6 +57,7 @@ import org.unitime.timetable.gwt.client.tables.TableInterface.LineInterface;
 import org.unitime.timetable.gwt.command.client.GwtRpcException;
 import org.unitime.timetable.gwt.command.server.GwtRpcImplementation;
 import org.unitime.timetable.gwt.command.server.GwtRpcImplements;
+import org.unitime.timetable.gwt.resources.GwtMessages;
 import org.unitime.timetable.gwt.shared.ClassAssignmentPageInterface.ChangeInterface;
 import org.unitime.timetable.gwt.shared.ClassAssignmentPageInterface.ClassAssignmentPageRequest;
 import org.unitime.timetable.gwt.shared.ClassAssignmentPageInterface.ClassAssignmentPageResponse;
@@ -122,6 +123,7 @@ import org.unitime.timetable.util.duration.DurationModel;
 public class ClassAssigmmentPageBackend implements GwtRpcImplementation<ClassAssignmentPageRequest, ClassAssignmentPageResponse>{
 	private static Log sLog = LogFactory.getLog(ClassAssigmmentPageBackend.class);
 	protected final static CourseMessages MSG = Localization.create(CourseMessages.class);
+	protected final static GwtMessages GMSG = Localization.create(GwtMessages.class);
 
 	@Override
 	public ClassAssignmentPageResponse execute(ClassAssignmentPageRequest request, SessionContext context) {
@@ -353,7 +355,8 @@ public class ClassAssigmmentPageBackend implements GwtRpcImplementation<ClassAss
             	if (datePattern.getDatePatternType() != DatePatternType.PatternSet) {
                 	c.addClick().setTitle(MSG.sectPreviewOfDatePattern(datePattern.getName()))
             			.addWidget().setId("UniTimeGWT:DatePattern").setContent(datePattern.getPatternText());
-                	c.setImage().setSource("images/calendar.png").addStyle("cursor: pointer; padding-left: 5px; vertical-align: bottom;");
+                	c.setImage().setSource("images/calendar.png").addStyle("cursor: pointer; padding-left: 5px; vertical-align: bottom;")
+                		.setAlt(MSG.sectPreviewOfDatePattern(datePattern.getName()));
             	}
             }
         }
@@ -508,15 +511,17 @@ public class ClassAssigmmentPageBackend implements GwtRpcImplementation<ClassAss
     		LineInterface line = table.addLine();
     		line.setURL("#id=" + assignment.getClassId());
     		if (assignment.getClassId().equals(proposed.getSelectedClassId()))
-    			line.setBgColor("rgb(168,187,225)");
+    			line.setBgColor("#b7d4fb");
     		CellInterface c = line.addCell();
     		c.add("").setUrl("#delete=" + assignment.getClassId()).setImage().setSource("images/action_delete.png")
-				.addStyle("cursor: pointer; padding-right: 5px; vertical-align: bottom;");
+				.addStyle("cursor: pointer; padding-right: 5px; vertical-align: bottom;")
+				.setAlt(GMSG.titleDeleteRow());
     		boolean canAssign = context.hasPermission(assignment.getClazz(), Right.ClassAssignment);
     		if (!canAssign && context.hasPermission(assignment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering(), Right.OfferingCanLock)) {
     			c.add("").setUrl("#lock=" + assignment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getUniqueId())
     				.setImage().setSource("images/error.png").addStyle("cursor: pointer; padding-right: 5px; vertical-align: bottom;")
-    				.setTitle(MSG.titleCourseNotLocked(assignment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getCourseName()));
+    				.setTitle(MSG.titleCourseNotLocked(assignment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getCourseName()))
+    				.setAlt(MSG.titleCourseNotLocked(assignment.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getCourseName()));
     		}
 			c.add(assignment.getClassName()).setTitle(assignment.getClassTitle());
     		line.addCell(assignment.getLeadingInstructorNames(", "));
@@ -553,7 +558,7 @@ public class ClassAssigmmentPageBackend implements GwtRpcImplementation<ClassAss
                 if (assignment.getClassId().equals(proposed.getSelectedClassId()))
                 	r.add(MSG.assignmentRoomSelectBelow()).addStyle("font-style: italic;");
                 else
-                	r.add(MSG.assignmentRoomNotSelected()).setColor("red").addStyle("font-style: italic;");
+                	r.add(MSG.assignmentRoomNotSelected()).setColor("#ee0000").addStyle("font-style: italic;");
 			}
 			if (assignment.getNumberOfRooms() == 0)
 				r.add(MSG.notApplicable()).addStyle("font-style: italic;");
@@ -568,7 +573,8 @@ public class ClassAssigmmentPageBackend implements GwtRpcImplementation<ClassAss
     			CellInterface c = line.addCell();
     			c.add("").setUrl("#lock=" + conflict.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getUniqueId())
     				.setImage().setSource("images/error.png").addStyle("cursor: pointer; padding-right: 5px; vertical-align: bottom;")
-    				.setTitle(MSG.titleCourseNotLocked(conflict.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getCourseName()));
+    				.setTitle(MSG.titleCourseNotLocked(conflict.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getCourseName()))
+    				.setAlt(MSG.titleCourseNotLocked(conflict.getClazz().getSchedulingSubpart().getInstrOfferingConfig().getInstructionalOffering().getCourseName()));
     			c.add(conflict.getClassName()).setTitle(conflict.getClassTitle());
     		} else {
     			line.addCell(conflict.getClassName()).setTitle(conflict.getClassTitle());

@@ -106,6 +106,24 @@ public interface GwtAriaMessages extends Messages {
 	@DefaultMessage("Priority {0, number} course or free time request.")
 	String titleRequestedCourse(int priority);
 	
+	@DefaultMessage("Priority {0, number} credit hours.")
+	String titleAcrCreditHours(int priority);
+	
+	@DefaultMessage("Priority {0, number} notes.")
+	String titleAcrNotes(int priority);
+	
+	@DefaultMessage("Priority {0, number} {1}.")
+	String titleAcrWaitList(int priority, String wlName);
+	
+	@DefaultMessage("Priority {0, number} {1}.")
+	String titleAcrCritical(int priority, String critName);
+	
+	@DefaultMessage("Substitute {0, number} credit hours.")
+	String titleAcrSubstituteCreditHours(int priority);
+	
+	@DefaultMessage("Substitute {0, number} notes.")
+	String titleAcrSubstituteNotes(int priority);
+	
 	@DefaultMessage("First alternative to the priority {0, number} course request.")
 	String titleRequestedCourseFirstAlternative(int priority);
 
@@ -306,6 +324,15 @@ public interface GwtAriaMessages extends Messages {
 	
 	@DefaultMessage("Check to prefer {0}")
 	String courseFinderPreferClass(String clazz);
+	
+	@DefaultMessage("Check to select {0}")
+	String courseFinderSelectCourse(String course);
+	
+	@DefaultMessage("Selected {0} as the first choice")
+	String courseFinderSelectedAsFirstChice(String course);
+	
+	@DefaultMessage("Selected {0} as the {1}. alternative")
+	String courseFinderSelectedAsAlt(String course, int alt);
 	
 	@DefaultMessage("Showing List of Classes. Use Alt + Up and Alt + Down to navigate, Alt + Enter to open Suggestions for the selected class.")
 	String listOfClasses();
@@ -553,4 +580,120 @@ public interface GwtAriaMessages extends Messages {
 	@DefaultMessage("Class end date")
 	String studentPrefClassEndDate();
 
+	@DefaultMessage("UniTime logo, goes to the UniTime''s main page.")
+	String pageUniTimeLogo();
+	
+	@DefaultMessage("Help page for {0}. Click the link to open the help page in a separate tab.")
+	String pageHelp(String pageName);
+	
+	@DefaultMessage("Questionmark")
+	String iconHelp();
+	
+	@DefaultMessage("Page navigation is closed. Click this line to open the navigation.")
+	String iconMenuClosed();
+	
+	@DefaultMessage("Page navigation is opened. Click this line to close the navigation.")
+	String iconMenuOpened();
+	
+	@DefaultMessage("Section opened. Click to close the section.")
+	String iconSectionOpened();
+	
+	@DefaultMessage("Section closed. Click to open the section.")
+	String iconSectionClosed();
+	
+	@DefaultMessage("Tree item colapsed")
+	String iconTreeClosed();
+	
+	@DefaultMessage("Tree item expanded")
+	String iconTreeOpened();
+	
+	@DefaultMessage("Tree leaf item")
+	String iconTreeLeaf();
+	
+	@DefaultMessage("Warning")
+	String iconWarning();
+	
+	@DefaultMessage("Information")
+	String iconInfo();
+	
+	@DefaultMessage("Error")
+	String iconError();
+	
+	@DefaultMessage("Confirmation")
+	String iconConfirm();
+	
+	@DefaultMessage("Preferences")
+	String iconPreferences();
+	
+	@DefaultMessage("Indentation")
+	String iconIndentation();
+	
+	@DefaultMessage("Week selection")
+	String inputWeekSelector();
+	
+	@DefaultMessage("Room selection")
+	String inputRoomSelector();
+	
+	@DefaultMessage("Click to delete this line.")
+	String buttonDeleteThisLine();
+	
+	@DefaultMessage("Mode selection")
+	String inputModeSelection();
+	
+	@DefaultMessage("Grade mode for {0}")
+	String labelGradeModeForCourse(String course);
+	
+	@DefaultMessage("Credit for {0}")
+	String labelCreditForCourse(String course);
+	
+	@DefaultMessage("Opens Course Finder dialog.")
+	String openCourseFinder();
+	
+	@DefaultMessage("Preview Date Pattern")
+	String iconDatePatternPreview();
+	
+	@DefaultMessage("Add Selected Item")
+	String iconAddSelectedItem();
+	
+	@DefaultMessage("Remove {0}")
+	String iconRemoveItem(String name);
+	
+	@DefaultMessage("Add {0}")
+	String iconAddItem(String name);
+
+	@DefaultMessage("Applies To")
+	String listApplesTo();
+	
+	@DefaultMessage("Select {0}")
+	String listSelectItem(String itemType);
+	
+	@DefaultMessage("Select preference level")
+	String listSelectPreferenceLevel();
+	
+	@DefaultMessage("Select preference level for {0}")
+	String listSelectPreferenceLevelFor(String item);
+	
+	@DefaultMessage("Select instructor")
+	String listSelectInstructor();
+	
+	@DefaultMessage("Checked")
+	String iconChecked();
+	
+	@DefaultMessage("Not Checked")
+	String iconNotChecked();
+	
+	@DefaultMessage("Instructor Availability")
+	String iconInstructorAvailability();
+	
+	@DefaultMessage("Campus Map")
+	String imageCampusMap();
+	
+	@DefaultMessage("Download {0}")
+	String iconDownload(String file);
+	
+	@DefaultMessage("Enter address to geocode")
+	String mapAddressToGeocode();
+	
+	@DefaultMessage("Edit {0}")
+	String iconEdit(String name);
 }

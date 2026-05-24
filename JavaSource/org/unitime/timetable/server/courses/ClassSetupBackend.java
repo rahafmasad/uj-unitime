@@ -70,6 +70,7 @@ import org.unitime.timetable.model.RoomGroup;
 import org.unitime.timetable.model.RoomGroupPref;
 import org.unitime.timetable.model.RoomPref;
 import org.unitime.timetable.model.SchedulingSubpart;
+import org.unitime.timetable.model.StandardSchedulingDisclaimer;
 import org.unitime.timetable.model.StudentClassEnrollment;
 import org.unitime.timetable.model.TimePattern;
 import org.unitime.timetable.model.TimePref;
@@ -132,6 +133,17 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 		form.setDisplayLms(Boolean.valueOf(LearningManagementSystemInfo.isLmsInfoDefinedForSession(context.getUser().getCurrentAcademicSessionId())));
 		form.setDisplaySnapshotLimit(io.getSnapshotLimitDate() != null);
 		form.setValidateLimits(ApplicationProperty.ConfigEditCheckLimits.isTrue());
+		form.setSchedulingDisclaimer(ioc.getSchedulingDisclaimer());
+		form.setCanEditSchedulingDisclaimer(context.hasPermission(io, Right.InstrOfferingConfigEditDisclaimer));
+		if (form.isCanEditSchedulingDisclaimer()) {
+			List<StandardSchedulingDisclaimer> discs = StandardSchedulingDisclaimer.findAll();
+			if (!discs.isEmpty()) {
+				form.addStdSchedDisclaimer(-1l, MSG.itemNoSchedulingDisclaimer(), "");
+				for (StandardSchedulingDisclaimer disc: discs)
+					form.addStdSchedDisclaimer(disc.getUniqueId(), disc.getLabel(), disc.getDisclaimer());
+				form.addStdSchedDisclaimer(-2l, MSG.itemCustomSchedulingDisclaimer(), "");
+			}
+		}
 		
 		String name = io.getCourseNameWithTitle();
         if (io.hasMultipleConfigurations()) {
@@ -296,6 +308,12 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 	        	hibSession.merge(ioc);
 	        }
 	        
+	        if (!ToolBox.equals(ioc.getSchedulingDisclaimer(), form.getSchedulingDisclaimer()) && context.hasPermission(ioc.getInstructionalOffering(), Right.InstrOfferingConfigEditDisclaimer)) {
+	        	ioc.setSchedulingDisclaimer(form.getSchedulingDisclaimer());
+	        	hibSession.merge(ioc);
+	        }
+
+	        
 	        // Get map of subpart ownership so that after the classes have changed it is possible to see if the ownership for a subparts has changed
 	        Map<Long, Department> origSubpartManagingDept = new HashMap<>();
         	for (SchedulingSubpart ss: ioc.getSchedulingSubparts())
@@ -400,6 +418,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nbp.setPrefLevel(bp.getPrefLevel());
 								nbp.setBuilding(bp.getBuilding());
 								nbp.setDistanceFrom(bp.getDistanceFrom());
+								nbp.setRoomIndex(bp.getRoomIndex());
 								c.addToPreferences(nbp);
 								classChanged = true;
 							}
@@ -413,6 +432,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nrp.setOwner(c);
 								nrp.setPrefLevel(rp.getPrefLevel());
 								nrp.setRoom(rp.getRoom());
+								nrp.setRoomIndex(rp.getRoomIndex());
 								c.addToPreferences(nrp);
 								classChanged = true;
 							}
@@ -426,6 +446,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nrfp.setOwner(c);
 								nrfp.setPrefLevel(rfp.getPrefLevel());
 								nrfp.setRoomFeature(rfp.getRoomFeature());
+								nrfp.setRoomIndex(rfp.getRoomIndex());
 								c.addToPreferences(nrfp);
 								classChanged = true;
 							}
@@ -439,6 +460,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nrgp.setOwner(c);
 								nrgp.setPrefLevel(rgp.getPrefLevel());
 								nrgp.setRoomGroup(rgp.getRoomGroup());
+								nrgp.setRoomIndex(rgp.getRoomIndex());
 								c.addToPreferences(nrgp);
 								classChanged = true;
 							}
@@ -489,6 +511,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nbp.setPrefLevel(bp.getPrefLevel());
 								nbp.setBuilding(bp.getBuilding());
 								nbp.setDistanceFrom(bp.getDistanceFrom());
+								nbp.setRoomIndex(bp.getRoomIndex());
 								c.addToPreferences(nbp);
 								classChanged = true;
 							}
@@ -504,6 +527,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nrp.setOwner(c);
 								nrp.setPrefLevel(rp.getPrefLevel());
 								nrp.setRoom(rp.getRoom());
+								nrp.setRoomIndex(rp.getRoomIndex());
 								c.addToPreferences(nrp);
 								classChanged = true;
 							}
@@ -519,6 +543,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nrfp.setOwner(c);
 								nrfp.setPrefLevel(rfp.getPrefLevel());
 								nrfp.setRoomFeature(rfp.getRoomFeature());
+								nrfp.setRoomIndex(rfp.getRoomIndex());
 								c.addToPreferences(nrfp);
 								classChanged = true;
 							}
@@ -534,6 +559,7 @@ public class ClassSetupBackend implements GwtRpcImplementation<ClassSetupInterfa
 								nrgp.setOwner(c);
 								nrgp.setPrefLevel(rgp.getPrefLevel());
 								nrgp.setRoomGroup(rgp.getRoomGroup());
+								nrgp.setRoomIndex(rgp.getRoomIndex());
 								c.addToPreferences(nrgp);
 								classChanged = true;
 							}

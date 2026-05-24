@@ -40,14 +40,15 @@ import org.unitime.timetable.model.dao.DistributionPrefDAO;
 import org.unitime.timetable.model.dao.ExamTypeDAO;
 import org.unitime.timetable.security.SessionContext;
 import org.unitime.timetable.security.rights.Right;
+import org.unitime.timetable.util.Constants;
 import org.unitime.timetable.util.PdfEventHandler;
 import org.unitime.timetable.util.PdfFont;
+import org.unitime.timetable.util.PdfWriter;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
 
 
 /**
@@ -191,7 +192,7 @@ public class ExamDistributionPrefsTableBuilder {
         	String distType = dp.getDistributionType().getLabel();
             String prefLevel = dp.getPrefLevel().getPrefName();
             String prefColor = dp.getPrefLevel().prefcolor();
-        	if (PreferenceLevel.sNeutral.equals(dp.getPrefLevel().getPrefProlog())) prefColor = "gray";
+        	if (PreferenceLevel.sNeutral.equals(dp.getPrefLevel().getPrefProlog())) prefColor = "#646464";
             String onClick = null;
             
             boolean gray = false;
@@ -208,9 +209,9 @@ public class ExamDistributionPrefsTableBuilder {
                     onClick, 
                 	new String[] { 
                     		(back?"<A name=\"back\"</A>":"")+
-                    		(gray?"<span style='color:gray;'>":"<span style='color:"+prefColor+";font-weight:bold;' title='"+prefLevel+" "+distType+"'>")+distType+"</span>",
-                    		(gray?"<span style='color:gray;'>":"")+examStr+(gray?"</span>":""), 
-                    		(gray?"<span style='color:gray;'>":"")+objStr+(gray?"</span>":"")
+                    		(gray?"<span style='color:#646464;'>":"<span style='color:"+prefColor+";font-weight:bold;' title='"+prefLevel+" "+distType+"'>")+distType+"</span>",
+                    		(gray?"<span style='color:#646464;'>":"")+examStr+(gray?"</span>":""), 
+                    		(gray?"<span style='color:#646464;'>":"")+objStr+(gray?"</span>":"")
                     	}, 
                    	new Comparable[] { distType, examStr, objStr });
             
@@ -299,6 +300,8 @@ public class ExamDistributionPrefsTableBuilder {
 		PdfWriter iWriter = PdfWriter.getInstance(doc, out);
 		iWriter.setPageEvent(new PdfEventHandler());
 		doc.open();
+		doc.addTitle(tbl.getName());
+		doc.addAuthor("UniTime "+Constants.getVersion());
 		
 		if (tbl.getName()!=null)
 			doc.add(new Paragraph(tbl.getName(), PdfFont.getBigFont(true)));

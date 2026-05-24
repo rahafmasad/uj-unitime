@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.unitime.timetable.gwt.client.TimeHint;
+import org.unitime.timetable.gwt.client.aria.ImageButton;
 import org.unitime.timetable.gwt.client.rooms.RoomHint;
 import org.unitime.timetable.gwt.client.solver.SolverCookie;
 import org.unitime.timetable.gwt.client.widgets.P;
@@ -36,6 +37,7 @@ import org.unitime.timetable.gwt.resources.GwtConstants;
 import org.unitime.timetable.gwt.resources.GwtMessages;
 import org.unitime.timetable.gwt.resources.GwtResources;
 import org.unitime.timetable.gwt.shared.SuggestionsInterface.ClassAssignmentDetails;
+import org.unitime.timetable.gwt.shared.SuggestionsInterface.PreferenceInterface;
 import org.unitime.timetable.gwt.shared.SuggestionsInterface.RoomInfo;
 import org.unitime.timetable.gwt.shared.SuggestionsInterface.SuggestionProperties;
 import org.unitime.timetable.gwt.shared.SuggestionsInterface.TimeInfo;
@@ -52,7 +54,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 
 /**
@@ -149,7 +150,7 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 	public void sort() {
 		if (iSortBy == null) return;
 		if (getNbrCells(iSortBy) == 0) iSortBy = AssignmentColumn.CLASS;
-		UniTimeTableHeader header = getHeader(getCellIndex(iSortBy));
+		TableHeaderCell header = getHeader(getCellIndex(iSortBy));
 		sort(header, new AssignmentComparator(iProperties.getFirstDay(), iSortBy, true), iAsc);
 	}
 	
@@ -205,9 +206,10 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 		case CLASS:
 			if (iCanRemove) {
 				P clazz = new P("class");
-				Image image = new Image(RESOURCES.delete());
+				ImageButton image = new ImageButton(RESOURCES.delete());
 				image.addStyleName("delete");
 				image.setTitle(MESSAGES.titleRemoveSelectedClassAssignment(details.getClazz().getName()));
+				image.setAltText(MESSAGES.titleRemoveSelectedClassAssignment(details.getClazz().getName()));
 				image.addClickHandler(new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
@@ -234,8 +236,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 			if (details.getTime() != null) {
 				P current = new P("old");
 				current.setText(details.getTime().getDatePatternName());
-				if (details.getTime().getDatePatternPreference() != 0)
-					current.getElement().getStyle().setColor(iProperties.getPreference(details.getTime().getDatePatternPreference()).getColor());
+				PreferenceInterface pref = iProperties.getPreference(details.getTime().getDatePatternPreference());
+				if (pref.hasStyle())
+					current.addStyleName(pref.getStyle());
+				else if (details.getTime().getDatePatternPreference() != 0) 
+					current.getElement().getStyle().setColor(pref.getColor());
 				if (details.getTime().isStriked())
 					current.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 				date.add(current);
@@ -245,16 +250,22 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 				} else if (!details.getAssignedTime().getDatePatternName().equals(details.getTime().getDatePatternName())) {
 					P arrow = new P("arrow"); arrow.setHTML(MESSAGES.assignmentArrow()); date.add(arrow);
 					P other = new P("new"); other.setText(details.getAssignedTime().getDatePatternName());
-					if (details.getAssignedTime().getDatePatternPreference() != 0)
-						other.getElement().getStyle().setColor(iProperties.getPreference(details.getAssignedTime().getDatePatternPreference()).getColor());
+					pref = iProperties.getPreference(details.getAssignedTime().getDatePatternPreference());
+					if (pref.hasStyle())
+						other.addStyleName(pref.getStyle());
+					else if (details.getAssignedTime().getDatePatternPreference() != 0)
+						other.getElement().getStyle().setColor(pref.getColor());
 					if (details.getAssignedTime().isStriked())
 						other.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 					date.add(other);
 				}
 			} else if (details.getAssignedTime() != null) {
 				P other = new P("new"); other.setText(details.getAssignedTime().getDatePatternName());
-				if (details.getAssignedTime().getDatePatternPreference() != 0)
-					other.getElement().getStyle().setColor(iProperties.getPreference(details.getAssignedTime().getDatePatternPreference()).getColor());
+				PreferenceInterface pref = iProperties.getPreference(details.getAssignedTime().getDatePatternPreference());
+				if (pref.hasStyle())
+					other.addStyleName(pref.getStyle());
+				else if (details.getAssignedTime().getDatePatternPreference() != 0)
+					other.getElement().getStyle().setColor(pref.getColor());
 				if (details.getAssignedTime().isStriked())
 					other.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 				date.add(other);
@@ -265,8 +276,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 			if (details.getTime() != null) {
 				final P current = new P("old");
 				current.setText(details.getTime().getName(iProperties.getFirstDay(), false, CONSTANTS));
-				if (details.getTime().getPref() != 0)
-					current.getElement().getStyle().setColor(iProperties.getPreference(details.getTime().getPref()).getColor());
+				PreferenceInterface pref = iProperties.getPreference(details.getTime().getPref());
+				if (pref.hasStyle())
+					current.addStyleName(pref.getStyle());
+				else if (details.getTime().getPref() != 0)
+					current.getElement().getStyle().setColor(pref.getColor());
 				if (details.getTime().isStriked())
 					current.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 				final String timeHint = details.getClazz().getClassId() + "," + details.getTime().getDays() + "," + details.getTime().getStartSlot();
@@ -289,8 +303,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 				} else if (details.getAssignedTime().getStartSlot() != details.getTime().getStartSlot() || details.getAssignedTime().getDays() != details.getTime().getDays() || !details.getAssignedTime().getPatternId().equals(details.getTime().getPatternId())) {
 					P arrow = new P("arrow"); arrow.setHTML(MESSAGES.assignmentArrow()); time.add(arrow);
 					final P other = new P("new"); other.setText(details.getAssignedTime().getName(iProperties.getFirstDay(), false, CONSTANTS));
-					if (details.getAssignedTime().getPref() != 0)
-						other.getElement().getStyle().setColor(iProperties.getPreference(details.getAssignedTime().getPref()).getColor());
+					pref = iProperties.getPreference(details.getAssignedTime().getPref());
+					if (pref.hasStyle())
+						other.addStyleName(pref.getStyle());
+					else if (details.getAssignedTime().getPref() != 0)
+						other.getElement().getStyle().setColor(pref.getColor());
 					if (details.getAssignedTime().isStriked())
 						other.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 					final String otherTimeHint = details.getClazz().getClassId() + "," + details.getAssignedTime().getDays() + "," + details.getAssignedTime().getStartSlot();
@@ -310,8 +327,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 				}
 			} else if (details.getAssignedTime() != null) {
 				final P other = new P("new"); other.setText(details.getAssignedTime().getName(iProperties.getFirstDay(), false, CONSTANTS));
-				if (details.getAssignedTime().getPref() != 0)
-					other.getElement().getStyle().setColor(iProperties.getPreference(details.getAssignedTime().getPref()).getColor());
+				PreferenceInterface pref = iProperties.getPreference(details.getAssignedTime().getPref());
+				if (pref.hasStyle())
+					other.addStyleName(pref.getStyle());
+				else if (details.getAssignedTime().getPref() != 0)
+					other.getElement().getStyle().setColor(pref.getColor());
 				if (details.getAssignedTime().isStriked())
 					other.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 				final String otherTimeHint = details.getClazz().getClassId() + "," + details.getAssignedTime().getDays() + "," + details.getAssignedTime().getStartSlot();
@@ -338,8 +358,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 					P room = new P("room");
 					final P current = new P("old");
 					current.setText(r.getName());
-					if (r.getPref() != 0)
-						current.getElement().getStyle().setColor(iProperties.getPreference(r.getPref()).getColor());
+					PreferenceInterface pref = iProperties.getPreference(r.getPref());
+					if (pref.hasStyle())
+						current.addStyleName(pref.getStyle());
+					else if (r.getPref() != 0)
+						current.getElement().getStyle().setColor(pref.getColor());
 					if (r.isStriked())
 						current.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 					if (r.getId() != null) {
@@ -362,8 +385,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 						if (!q.getId().equals(r.getId())) {
 							P arrow = new P("arrow"); arrow.setHTML(MESSAGES.assignmentArrow()); room.add(arrow);
 							final P other = new P("new"); other.setText(q.getName());
-							if (q.getPref() != 0)
-								other.getElement().getStyle().setColor(iProperties.getPreference(q.getPref()).getColor());
+							pref = iProperties.getPreference(q.getPref());
+							if (pref.hasStyle())
+								other.addStyleName(pref.getStyle());
+							else if (q.getPref() != 0)
+								other.getElement().getStyle().setColor(pref.getColor());
 							if (q.isStriked())
 								other.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 							if (q.getId() != null) {
@@ -397,8 +423,11 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 					final RoomInfo q = details.getAssignedRoom().get(i);
 					P room = new P("room");
 					final P other = new P("new"); other.setText(q.getName());
-					if (q.getPref() != 0)
-						other.getElement().getStyle().setColor(iProperties.getPreference(q.getPref()).getColor());
+					PreferenceInterface pref = iProperties.getPreference(q.getPref());
+					if (pref.hasStyle())
+						other.addStyleName(pref.getStyle());
+					else if (q.getPref() != 0)
+						other.getElement().getStyle().setColor(pref.getColor());
 					if (q.isStriked())
 						other.getElement().getStyle().setTextDecoration(TextDecoration.LINE_THROUGH);
 					if (q.getId() != null) {
@@ -582,52 +611,10 @@ public class AssignmentTable extends UniTimeTable<ClassAssignmentDetails>{
 	
 	public static interface SortOperation extends Operation, HasColumnName {}
 	
-	public static String dispNumber(int number) {
-		return dispNumber("",number);
-	}
-	
-	public static String dispNumber(String prefix, int number) {
-		if (number>0) return "<font color='red'>"+prefix+"+"+number+"</font>";
-	    if (number<0) return "<font color='green'>"+prefix+number+"</font>";
-	    return prefix+"0";
-	}
-	
-	public static String dispNumberShort(boolean rem, int n1, int n2) {
-		if (n1==0 && n2==0) return "";
-		if (rem) return dispNumber(-n1);
-		int dif = n2-n1;
-		if (dif==0)
-			return n1+"&rarr;"+n2;
-		else if (dif<0)
-			return "<font color='green'>"+n1+"&rarr;"+n2+"</font>";
-		else
-			return "<font color='red'>"+n1+"&rarr;"+n2+"</font>";
-	}
-	
 	public static String dispNumber(String prefix, double number) {
-		if (number>0) return "<font color='red'>"+prefix+"+"+sDF.format(number)+"</font>";
-	    if (number<0) return "<font color='green'>"+prefix+sDF.format(number)+"</font>";
+		if (number>0) return "<span style='color:#b80000;'>"+prefix+"+"+sDF.format(number)+"</span>";
+		if (number<0) return "<span style='color:#1d6600;'>"+prefix+sDF.format(number)+"</span>";
 	    return prefix+"0";
-	}
-	
-	public static String dispNumberShort(boolean rem, double n1, double n2) {
-		return dispNumberShort(rem,"",n1,n2);
-	}
-	
-	public static String dispNumberShort(boolean rem, String prefix, double n1, double n2) {
-		if (n1==0 && n2==0) return "";
-		if (rem) return dispNumber(prefix,-n1);
-		double dif = n2-n1;
-		if (dif==0)
-			return prefix+sDF.format(n1)+"&rarr;"+sDF.format(n2);
-		else if (dif<0)
-			return "<font color='green'>"+prefix+sDF.format(n1)+"&rarr;"+sDF.format(n2)+"</font>";
-		else
-			return "<font color='red'>"+prefix+sDF.format(n1)+"&rarr;"+sDF.format(n2)+"</font>";
-	}
-	
-	public static String dispNumber(int n1, int n2) {
-		return dispNumber(n1-n2);//+" ("+n2+(n1==n2?"":" &rarr; "+n1)+")";
 	}
 	
 	public static String dispNumber(double n1, double n2) {

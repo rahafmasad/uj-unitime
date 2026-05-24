@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.unitime.timetable.gwt.client.aria.AriaStatus;
+import org.unitime.timetable.gwt.client.aria.ClickableLabel;
 import org.unitime.timetable.gwt.client.aria.ImageButton;
 import org.unitime.timetable.gwt.client.widgets.OpenCloseSectionImage;
 import org.unitime.timetable.gwt.client.widgets.P;
@@ -125,10 +126,11 @@ public class SpecialRegistrationsPanel extends P {
 		iPanel.addStyleName("registrations-panel");
 		add(iPanel);
 		
+		P p = new P("registrations-toggle");
 		iShowAllChanges = new CheckBox(MESSAGES.checkOverridesShowAllChanges());
 		iShowAllChanges.setValue(SectioningCookie.getInstance().isShowAllChanges());
-		iShowAllChanges.addStyleName("registrations-toggle");
-		add(iShowAllChanges);
+		p.add(iShowAllChanges);
+		add(p);
 		
 		iPanel.addKeyUpHandler(new KeyUpHandler() {
 			@Override
@@ -349,15 +351,13 @@ public class SpecialRegistrationsPanel extends P {
 						row.add(new P("icons"));
 					}
 					Label label = new Label();
-					label.addStyleName("date-and-note");
 					if (lastCourseId == null || !lastCourseId.equals(ca.getCourseId())) {
 						String course = rows.get(r).getCourseName();
 						String note = reg.getNote(course);
 						if (iSpecReg.isAllowChangeRequestNote() && reg.getStatus() == SpecialRegistrationStatus.Pending && reg.hasErrors(course) && (note == null || note.isEmpty()))
 							note = MESSAGES.noRequestNoteClickToChange();
-						label.setText(r > 0 || reg.getSubmitDate() == null ? note == null ? "" : note : sModifiedDateFormat.format(reg.getSubmitDate()) + (note == null || note.isEmpty() ? "" : "\n" + note));
 						if (iSpecReg.isAllowChangeRequestNote() && reg.getStatus() == SpecialRegistrationStatus.Pending && reg.hasErrors(course)) {
-							label.getElement().getStyle().setCursor(Cursor.POINTER);
+							label = new ClickableLabel();
 							final String courseName = rows.get(r).getCourseName();
 							final Long courseId = rows.get(r).getCourseId();
 							label.addClickHandler(new ClickHandler() {
@@ -368,7 +368,9 @@ public class SpecialRegistrationsPanel extends P {
 								}
 							});
 						}
+						label.setText(r > 0 || reg.getSubmitDate() == null ? note == null ? "" : note : sModifiedDateFormat.format(reg.getSubmitDate()) + (note == null || note.isEmpty() ? "" : "\n" + note));
 					}
+					label.addStyleName("date-and-note");
 					row.add(label);
 					if (lastCourseId == null || !lastCourseId.equals(ca.getCourseId())) {
 						row.add(new Label(ca.getSubject(), false));
@@ -782,7 +784,7 @@ public class SpecialRegistrationsPanel extends P {
 				for (ErrorMessage e: reg.getErrors())
 					confirm.addMessage(null, e.getCourse(), e.getCode(), e.getMessage(), 0, 3);
 			}
-			CourseRequestsConfirmationDialog.confirm(confirm, 0, GWT_RESOURCES.confirm(), new AsyncCallback<Boolean>() {
+			CourseRequestsConfirmationDialog.confirm(confirm, 0, GWT_RESOURCES.confirm(), ARIA.iconConfirm() , new AsyncCallback<Boolean>() {
 				@Override
 				public void onFailure(Throwable caught) {
 				}

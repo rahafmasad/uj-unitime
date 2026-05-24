@@ -35,6 +35,7 @@ import org.unitime.timetable.gwt.resources.GwtResources;
 import org.unitime.timetable.gwt.shared.EventInterface.FilterRpcResponse;
 import org.unitime.timetable.gwt.shared.RoomInterface.GroupInterface;
 import org.unitime.timetable.gwt.shared.RoomInterface.RoomGroupsColumn;
+import org.unitime.timetable.gwt.shared.RoomInterface.RoomPropertiesInterface;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -58,9 +59,10 @@ public class RoomGroupsTable extends UniTimeTable<GroupInterface> {
 	
 	private RoomGroupsColumn iSortBy = null;
 	private boolean iAsc = true;
+	private RoomPropertiesInterface iProperties = null;
 	
 	public RoomGroupsTable(boolean isGlobal) {
-		setStyleName("unitime-RoomGroups");
+		addStyleName("unitime-RoomGroups");
 		iGlobal = isGlobal;
 		
 		List<UniTimeTableHeader> header = new ArrayList<UniTimeTableHeader>();
@@ -100,6 +102,8 @@ public class RoomGroupsTable extends UniTimeTable<GroupInterface> {
 		
 		setSortBy(RoomCookie.getInstance().getRoomGroupsSortBy());
 	}
+	
+	public void setProperties(RoomPropertiesInterface props) { iProperties = props; }
 	
 	protected void doSort(RoomGroupsColumn column) {
 		if (column == iSortBy) {
@@ -179,12 +183,14 @@ public class RoomGroupsTable extends UniTimeTable<GroupInterface> {
 		case ABBREVIATION:
 			return new Label(group.getAbbreviation() == null ? "" : group.getAbbreviation(), false);
 		case DEFAULT:
-			if (group.isDefault())
-				return new Image(RESOURCES.on());
-			else
+			if (group.isDefault()) {
+				Image on = new Image(RESOURCES.on());
+				on.setAltText(MESSAGES.exportTrue());
+				return on; 
+			} else
 				return null;
 		case DEPARTMENT:
-			return new DepartmentCell(true, group.getDepartment());
+			return new DepartmentCell(true, iProperties, group.getDepartment());
 		case DESCRIPTION:
 			if (group.hasDescription()) {
 				HTML html = new HTML(group.getDescription());
@@ -216,9 +222,9 @@ public class RoomGroupsTable extends UniTimeTable<GroupInterface> {
 		}
 		
 		int row = addRow(group, widgets);
-		getRowFormatter().setStyleName(row, "row");
+		getRowFormatter().addStyleName(row, "row");
 		for (int col = 0; col < getCellCount(row); col++)
-			getCellFormatter().setStyleName(row, col, "cell");
+			getCellFormatter().addStyleName(row, col, "cell");
 		
 		return row;
 	}
@@ -277,6 +283,7 @@ public class RoomGroupsTable extends UniTimeTable<GroupInterface> {
 		for (int i = 1; i < getRowCount(); i++) {
 			if (groupId.equals(getData(i).getId())) {
 				ToolBox.scrollToElement(getRowFormatter().getElement(i));
+				ToolBox.focusOnRow(getRowFormatter().getElement(i));
 				return;
 			}
 		}

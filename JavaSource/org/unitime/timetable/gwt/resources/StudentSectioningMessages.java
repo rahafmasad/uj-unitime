@@ -1175,16 +1175,16 @@ public interface StudentSectioningMessages extends Messages {
 			"<br><br>Example: day: monday and (time: 730 or time: 830)")
 	String suggestionsFilterHint();
 	
-	@DefaultMessage("<span class='item' style='color:blue;'>Changes to the selected free time {0} are in blue,</span><span class='item' style='color:red;'> classes to be removed from the schedule are in red.</span><span class='item'> Changes to other classes or free times are in black.</span>")
+	@DefaultMessage("<span class='item' style='color:blue;'>Changes to the selected free time {0} are in blue,</span><span class='item' style='color:#e00;'> classes to be removed from the schedule are in red.</span><span class='item'> Changes to other classes or free times are in black.</span>")
 	String suggestionsLegendOnFreeTime(String freeTime);
 
-	@DefaultMessage("<span class='item' style='color:blue;'>Changes to the selected class {0} are in blue,</span><span class='item' style='color:red;'> classes to be removed from the schedule are in red.</span><span class='item'> Changes to other classes or free times are in black.</span>")
+	@DefaultMessage("<span class='item' style='color:blue;'>Changes to the selected class {0} are in blue,</span><span class='item' style='color:#e00;'> classes to be removed from the schedule are in red.</span><span class='item'> Changes to other classes or free times are in black.</span>")
 	String suggestionsLegendOnClass(String clazz);
 	
-	@DefaultMessage("<span class='item' style='color:blue;'>Changes to the selected course {0} are in blue,</span><span class='item' style='color:red;'> classes to be removed from the schedule are in red.</span><span class='item'> Changes to other courses or free times are in black.</span>")
+	@DefaultMessage("<span class='item' style='color:blue;'>Changes to the selected course {0} are in blue,</span><span class='item' style='color:#e00;'> classes to be removed from the schedule are in red.</span><span class='item'> Changes to other courses or free times are in black.</span>")
 	String suggestionsLegendOnCourse(String course);
 	
-	@DefaultMessage("<span class='item' style='color:blue;'>Choices for the new course {0} are in blue.</span><span class='item' style='color:red;'> Courses to be removed from the schedule are in red.</span><span class='item'> Changes to other courses or free times are in black.</span>")
+	@DefaultMessage("<span class='item' style='color:blue;'>Choices for the new course {0} are in blue.</span><span class='item' style='color:#e00;'> Courses to be removed from the schedule are in red.</span><span class='item'> Changes to other courses or free times are in black.</span>")
 	String suggestionsLegendOnNewCourse(String course);
 
 	@DefaultMessage("<u>S</u>earch")
@@ -1262,13 +1262,13 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Available {0} out of {1} spaces, reservation required for {2} of them")
 	String availableSomeReservation(int available, int limit, int availableWithReservation);
 	
-	@DefaultMessage("<sup><font color='#2066CE'>r)</font></sup>")
+	@DefaultMessage("<sup style='color:#2066CE;'>r)</sup>")
 	String htmlReservationSign();
 	
-	@DefaultMessage("<sup><font color='#2066CE'>w)</font></sup>")
+	@DefaultMessage("<sup style='color:#2066CE;'>w)</sup>")
 	String htmlWaitListSign();
 	
-	@DefaultMessage("<sup><font color='#2066CE'>n)</font></sup>")
+	@DefaultMessage("<sup style='color:#2066CE;'>n)</sup>")
 	String htmlNoSubSign();
 		
 	@DefaultMessage(" (r)")
@@ -1319,7 +1319,7 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Change <u>L</u>og")
 	String tabChangeLog();
 
-	@DefaultMessage("<sup><font color='#2066CE'>({0}p)</font></sup>")
+	@DefaultMessage("<sup style='color:#2066CE;'>({0}p)</sup>")
 	String firstWaitListedPrioritySign(int priority);
 	
 	@DefaultMessage(" ({0}p)")
@@ -1799,13 +1799,19 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("This schedule only displays classes with assigned time. To see your full list of classes, please open the List of classes tab.")
 	String timeGridNotAssignedTimes();
 	
-	@DefaultMessage("Together with other registration changes, the course {0} will be dropped. Do you want to proceed?")
+	@DefaultMessage("Course {0} will be dropped.")
 	String confirmEnrollmentCourseDrop(String course);
+	
+	@DefaultMessage("Together with other registration changes, there are the following warnings:")
+	String confirmHeader();
+	
+	@DefaultMessage("Do you want to proceed?")
+	String confirmQuestion();
 		
-	@DefaultMessage("Together with other registration changes, the critical course {0} will be dropped. This may prohibit progress towards degree. Please consult with your academic advisor. Do you want to proceed?")
+	@DefaultMessage("Critical course {0} will be dropped. This may prohibit progress towards degree. Please consult with your academic advisor.")
 	String confirmEnrollmentCriticalCourseDrop(String course);
 	
-	@DefaultMessage("Together with other registration changes, the course {0} will have a long travel time. Do you want to proceed?")
+	@DefaultMessage("Course {0} will have a long travel time.")
 	String confirmLongTravel(String course);
 	
 	@DefaultMessage("<u>N</u>ew Course")
@@ -2836,10 +2842,10 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("{0} (Mixed)")
 	String gradeModeItemNotSame(String gm);
 	
-	@DefaultMessage("You are making changes to {0} that has an honors grade mode. This will change the grade mode back to the regular grade mode for this course. Do you want to proceed?")
+	@DefaultMessage("You are making changes to {0} that has an honors grade mode. This will change the grade mode back to the regular grade mode for this course.")
     String confirmEnrollmentHonorsGradeModeChange(String course);
 	
-	@DefaultMessage("You are making changes to {0} that has variable credit hours. This will change the credit hours back to the minimum for this course. Do you want to proceed?")
+	@DefaultMessage("You are making changes to {0} that has variable credit hours. This will change the credit hours back to the minimum for this course.")
     String confirmEnrollmentVariableCreditChange(String course);
 	
 	@DefaultMessage("Requested classes do not match your current schedule. The honors grade mode change cannot be processed. Please request a new grade mode change.")
@@ -3139,11 +3145,11 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Missing {0} primary course(s).")
 	String hintAdvisedMissingOther(int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> cr</sup></span> + {1}")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> cr</sup></span> + {1}")
 	@DoNotTranslate
 	String advisedMissingCriticalOther(int critical, int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> critical</sup></span>")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> critical</sup></span>")
 	@DoNotTranslate
 	String advisedMissingCritical(int critical);
 	
@@ -3160,11 +3166,11 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Not enrolled {0} primary course(s).")
 	String hintAdvisedNotAssignedOther(int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> cr</sup></span> + {1}")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> cr</sup></span> + {1}")
 	@DoNotTranslate
 	String advisedNotAssignedCriticalOther(int critical, int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> critical</sup></span>")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> critical</sup></span>")
 	@DoNotTranslate
 	String advisedNotAssignedCritical(int critical);
 	
@@ -3313,7 +3319,7 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Wait-Listed Courses")
 	String panelWaitListedCourses();
 	
-	@DefaultMessage("Course {0} will no longer be wait-listed. Do you want to proceed?")
+	@DefaultMessage("Course {0} will no longer be wait-listed.")
 	String confirmCourseDropFromWaitList(String course);
 	
 	@DefaultMessage("Course {0} cannot be wait-listed as there is a pending approval requested already.")
@@ -3457,10 +3463,10 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Between {0} and {1}")
 	String schedulingPrefClassesBetween(String fromDate, String toDate);
 
-	@DefaultMessage("Together with other registration changes, the vital course {0} will be dropped. This may prohibit progress towards degree. Please consult with your academic advisor. Do you want to proceed?")
+	@DefaultMessage("Vital course {0} will be dropped. This may prohibit progress towards degree. Please consult with your academic advisor.")
 	String confirmEnrollmentVitalCourseDrop(String course);
 	
-	@DefaultMessage("Together with other registration changes, the important course {0} will be dropped. This may prohibit progress towards degree. Please consult with your academic advisor. Do you want to proceed?")
+	@DefaultMessage("Important course {0} will be dropped. This may prohibit progress towards degree. Please consult with your academic advisor.")
 	String confirmEnrollmentImportantCourseDrop(String course);
 
 	@DefaultMessage("Missing vital course {0}.")
@@ -3484,11 +3490,11 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Missing {0} vital course(s).")
 	String hintAdvisedMissingVital(int vital);
 
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> vt</sup></span> + {1}")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> vt</sup></span> + {1}")
 	@DoNotTranslate
 	String advisedMissingVitalOther(int vital, int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> vital</sup></span>")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> vital</sup></span>")
 	@DoNotTranslate
 	String advisedMissingVital(int vital);
 	
@@ -3498,11 +3504,11 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Not enrolled {0} vital course(s).")
 	String hintAdvisedNotAssignedVital(int vital);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> vt</sup></span> + {1}")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> vt</sup></span> + {1}")
 	@DoNotTranslate
 	String advisedNotAssignedVitalOther(int vital, int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> vital</sup></span>")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> vital</sup></span>")
 	@DoNotTranslate
 	String advisedNotAssignedVital(int vital);
 	
@@ -3527,11 +3533,11 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Missing {0} important course(s).")
 	String hintAdvisedMissingImportant(int important);
 
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> im</sup></span> + {1}")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> im</sup></span> + {1}")
 	@DoNotTranslate
 	String advisedMissingImportantOther(int important, int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> important</sup></span>")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> important</sup></span>")
 	@DoNotTranslate
 	String advisedMissingImportant(int important);
 	
@@ -3541,15 +3547,15 @@ public interface StudentSectioningMessages extends Messages {
 	@DefaultMessage("Not enrolled {0} important course(s).")
 	String hintAdvisedNotAssignedImportant(int important);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> im</sup></span> + {1}")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> im</sup></span> + {1}")
 	@DoNotTranslate
 	String advisedNotAssignedImportantOther(int important, int other);
 	
-	@DefaultMessage("<span style='color:red;font-weight:bold;'>{0}<sup> important</sup></span>")
+	@DefaultMessage("<span style='color:#c00;font-weight:bold;'>{0}<sup> important</sup></span>")
 	@DoNotTranslate
 	String advisedNotAssignedImportant(int important);
 	
-	@DefaultMessage("You are trying to wait-list for a different section of {0} without indicating which section(s) you need. The wait-list for {0} will not be active. Do you want to proceed?")
+	@DefaultMessage("You are trying to wait-list for a different section of {0} without indicating which section(s) you need. The wait-list for {0} will not be active.")
     String confirmSectionSwapNoPrefs(String course);
 	
 	@DefaultMessage("Max Credit")
@@ -3812,4 +3818,10 @@ public interface StudentSectioningMessages extends Messages {
 	
 	@DefaultMessage("Not-Assigned Associated Course Issues")
 	String reportDependentCourseIssues();
+	
+	@DefaultMessage("Course Request Alternatives Statistics")
+	String reportCourseRequestAltStats();
+	
+	@DefaultMessage("Course {0} {1} does not exist in the catalog.")
+	String catalogCourseNotInCatalog(String subject, String course);
 }

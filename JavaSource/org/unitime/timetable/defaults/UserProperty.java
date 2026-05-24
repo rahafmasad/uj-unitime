@@ -19,6 +19,7 @@
 */
 package org.unitime.timetable.defaults;
 
+import org.unitime.timetable.filter.UserSettingsFilter;
 import org.unitime.timetable.security.UserContext;
 
 /**
@@ -50,7 +51,8 @@ public enum UserProperty {
 	PrimaryCampus("primaryAcademicInitiative", "Primary academic initiative"),
 	StudentDashboardShowUnmatchedClasses("sctdashShowUnmatchedClasses", CommonValues.Yes, "Student Scheduling Dashboard: Show classes not meeting the filter (as grayed out)."),
 	StudentDashboardShowUnmatchedCourses("sctdashShowUnmatchedCourses", CommonValues.No, "Student Scheduling Dashboard: Show courses that have no students meeting the filter (as grayed out)."),
-	StickyTables("stickyTables", CommonValues.No, "Instructional Offerings / Classes: Freeze header row.")
+	StickyTables("stickyTables", CommonValues.No, "Instructional Offerings / Classes: Freeze header row."),
+	HighContrastPreferences("highContrastPreferences", CommonValues.Yes, "Use preference levels with color backgrounds."),
 	;
 
 	String iKey, iDefault, iDescription;
@@ -66,5 +68,8 @@ public enum UserProperty {
 	
 	public String get(UserContext user) {
 		return user == null ? defaultValue() : user.getProperty(this);
+	}
+	public String get() {
+		return UserSettingsFilter.getUserSetting(this);
 	}
 }

@@ -34,7 +34,6 @@ import org.unitime.timetable.model.Event;
 import org.unitime.timetable.model.Exam;
 import org.unitime.timetable.model.ExamEvent;
 import org.unitime.timetable.model.ExamType;
-import org.unitime.timetable.model.ExternalRoom;
 import org.unitime.timetable.model.GlobalRoomFeature;
 import org.unitime.timetable.model.InstrOfferingConfig;
 import org.unitime.timetable.model.InstructionalOffering;
@@ -123,6 +122,7 @@ public enum Right {
 	InstrOfferingConfigEdit(InstrOfferingConfig.class),
 	InstrOfferingConfigEditDepartment(Department.class),
 	InstrOfferingConfigEditSubpart(SchedulingSubpart.class),
+	InstrOfferingConfigEditDisclaimer(InstructionalOffering.class),
 	InstrOfferingConfigDelete(InstrOfferingConfig.class),
 
 	MultipleClassSetup(InstrOfferingConfig.class),
@@ -187,6 +187,8 @@ public enum Right {
     InstructorSurvey(Department.class),
     InstructorSurveyAdmin(Department.class),
     
+    CourseCatalog(Session.class),
+    
 	Rooms(Session.class),
 	RoomsExportPdf(Session.class),
 	RoomsExportCsv(Session.class),
@@ -206,8 +208,6 @@ public enum Right {
 	EditRoomDepartments(Department.class),
 	EditRoomDepartmentsExams(Session.class),
 	AddRoom(Department.class),
-	AddSpecialUseRoom(Department.class),
-	AddSpecialUseRoomExternalRoom(ExternalRoom.class),
     RoomDelete(Room.class),
 	RoomDetailAvailability(Location.class),
 	RoomDetailPeriodPreferences(Location.class),
@@ -337,6 +337,7 @@ public enum Right {
     StudentSectioningSolverLog(Session.class),
     StudentSectioningSolverDashboard(Session.class),
     StudentSectioningSolverReports(Session.class),
+    StudentSectioningSolverAdminReports(Session.class),
     StudentSectioningSolutionExportXml(Session.class),
     StudentSectioningSolverPublish(Session.class),
     
@@ -614,6 +615,9 @@ public enum Right {
 	EventServiceProviderEditGlobal,
 	EventServiceProviderEditSession(Session.class),
 	EventServiceProviderEditDepartment(Department.class),
+	
+	SchedulingDisclaimers,
+	SchedulingDisclaimerEdit,
 
 	/** Point In Time Data */
 	

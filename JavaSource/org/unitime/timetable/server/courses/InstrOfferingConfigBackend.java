@@ -75,6 +75,7 @@ import org.unitime.timetable.model.RoomGroup;
 import org.unitime.timetable.model.RoomGroupPref;
 import org.unitime.timetable.model.RoomPref;
 import org.unitime.timetable.model.SchedulingSubpart;
+import org.unitime.timetable.model.StandardSchedulingDisclaimer;
 import org.unitime.timetable.model.TimePattern;
 import org.unitime.timetable.model.TimePatternModel;
 import org.unitime.timetable.model.TimePref;
@@ -152,6 +153,18 @@ public class InstrOfferingConfigBackend implements GwtRpcImplementation<InstrOff
         form.setDisplayCourseLink(ApplicationProperty.CustomizationCourseLink.value() != null && !ApplicationProperty.CustomizationCourseLink.value().isEmpty());
         form.setCheckLimits(ApplicationProperty.ConfigEditCheckLimits.isTrue());
         form.setMaxNumberOfClasses(ApplicationProperty.SubpartMaxNumClasses.intValue());
+        
+        form.setSchedulingDisclaimer(ioc == null ? null : ioc.getSchedulingDisclaimer());
+        form.setCanEditSchedulingDisclaimer(context.hasPermission(io, Right.InstrOfferingConfigEditDisclaimer));
+        if (form.isCanEditSchedulingDisclaimer()) {
+			List<StandardSchedulingDisclaimer> discs = StandardSchedulingDisclaimer.findAll();
+			if (!discs.isEmpty()) {
+				form.addStdSchedDisclaimer(-1l, MSG.itemNoSchedulingDisclaimer(), "");
+				for (StandardSchedulingDisclaimer disc: discs)
+					form.addStdSchedDisclaimer(disc.getUniqueId(), disc.getLabel(), disc.getDisclaimer());
+				form.addStdSchedDisclaimer(-2l, MSG.itemCustomSchedulingDisclaimer(), "");
+			}
+		}
         
         Department contrDept = io.getControllingCourseOffering().getSubjectArea().getDepartment();
         form.addDepartment(-1l, "-", MSG.subpartMultipleManagers(), false);
@@ -314,6 +327,9 @@ public class InstrOfferingConfigBackend implements GwtRpcImplementation<InstrOff
 	        	ioc.setClassDurationType(form.getDurationTypeId() == null || form.getDurationTypeId() < 0l ? null : ClassDurationTypeDAO.getInstance().get(form.getDurationTypeId(), hibSession));
 	        if (form.isInstructionalMethodEditable())
 	        	ioc.setInstructionalMethod(form.getInstructionalMethodId() == null || form.getInstructionalMethodId() < 0l ? null : InstructionalMethodDAO.getInstance().get(form.getInstructionalMethodId(), hibSession));
+
+	        if (context.hasPermission(io, Right.InstrOfferingConfigEditDisclaimer))
+	        	ioc.setSchedulingDisclaimer(form.getSchedulingDisclaimer());
 	        
 	        if (ioc.getUniqueId() == null)
 	        	hibSession.persist(ioc);
@@ -807,6 +823,7 @@ public class InstrOfferingConfigBackend implements GwtRpcImplementation<InstrOff
             
             for (DistributionPref dp: distPrefs) {
             	if (dp.getDistributionObjects().isEmpty())  {
+            		dp.getOwner().getPreferences().remove(dp);
             		hibSession.remove(dp);	
             	} else {
             		int sequenceNumber = 1;

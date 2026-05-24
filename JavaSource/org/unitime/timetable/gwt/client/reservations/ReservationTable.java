@@ -131,6 +131,7 @@ public class ReservationTable extends Composite {
 		
 		iReservations = new UniTimeTable<ReservationInterface>();
 		iReservationPanel.addRow(iReservations);
+		iReservations.setVisible(false);
 		
 
 		if (!showHeader)
@@ -258,7 +259,7 @@ public class ReservationTable extends Composite {
 						if (course.getAbbv().equals(reservation.getOffering().getAbbv())) continue;
 						Label l = new Label(course.getAbbv(), false);
 						l.getElement().getStyle().setMarginLeft(10, Unit.PX);
-						l.getElement().getStyle().setColor("gray");
+						l.getElement().getStyle().setColor("#646464");
 						courses.add(l);
 					}
 				}
@@ -413,7 +414,9 @@ public class ReservationTable extends Composite {
 				label.getElement().getStyle().setWhiteSpace(WhiteSpace.PRE);
 				line.add(label);
 				String filter = ((UniversalReservation) reservation).getFilter();
-				line.add(new Label(filter == null ? "" : filter, false));
+				Label filterLabel = new Label(filter == null ? "" : filter, true);
+				filterLabel.getElement().getStyle().setWhiteSpace(WhiteSpace.PRE_WRAP);
+				line.add(filterLabel);
 			} else {
 				Label label = new Label(MESSAGES.reservationUnknownAbbv() + flags);
 				label.getElement().getStyle().setWhiteSpace(WhiteSpace.PRE);
@@ -522,6 +525,8 @@ public class ReservationTable extends Composite {
 				iReservations.sort(h, cmp, asc);
 			}
 		}
+		
+		iReservations.setVisible(true);
 	}
 	
 	private static class Number extends HTML implements HasCellAlignment {

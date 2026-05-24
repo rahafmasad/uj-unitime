@@ -46,6 +46,7 @@ import org.unitime.timetable.gwt.resources.GwtResources;
 import org.unitime.timetable.gwt.shared.EventInterface.EventServiceProviderInterface;
 import org.unitime.timetable.gwt.shared.RoomInterface.AttachmentTypeInterface;
 import org.unitime.timetable.gwt.shared.RoomInterface.DepartmentInterface;
+import org.unitime.timetable.gwt.shared.RoomInterface.DepartmentInterface.DeptMode;
 import org.unitime.timetable.gwt.shared.RoomInterface.ExamTypeInterface;
 import org.unitime.timetable.gwt.shared.RoomInterface.FeatureInterface;
 import org.unitime.timetable.gwt.shared.RoomInterface.FeatureTypeInterface;
@@ -175,7 +176,10 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		for (RoomsColumn column: RoomsColumn.values()) {
 			int nrCells = getNbrCells(column);
 			for (int idx = 0; idx < nrCells; idx++) {
-				UniTimeTableHeader h = new UniTimeTableHeader(getColumnName(column, idx), getColumnAlignment(column, idx));
+				UniTimeTableHeader h = new UniTimeTableHeader(getColumnName(column, idx), getColumnAlignment(column, idx)) {
+					@Override
+					public boolean isCanFocus() { return true; }
+				};
 				header.add(h);
 			}
 		}
@@ -328,9 +332,9 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 				@Override
 				public String getName() {
 					if (RoomCookie.getInstance().getDeptMode() == d.ordinal())
-						return MESSAGES.opUncheck(d.getName());
+						return MESSAGES.opUncheck(getDeptModeLabel(d));
 					else
-						return MESSAGES.opCheck(d.getName());
+						return MESSAGES.opCheck(getDeptModeLabel(d));
 				}
 			};
 			iDepartmentOperations.add(op);
@@ -713,7 +717,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 			if (iDepartment != null) {
 				for (DepartmentInterface department: room.getDepartments()) {
 					if (iDepartment.equals(department.getDeptCode()) && department.getPreference() != null) {
-						return new PreferenceCell(department);
+						return new PreferenceCell(department, iProperties);
 					}
 				}
 				return null;
@@ -724,7 +728,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 						hasPreferences = true; break;
 					}
 				if (hasPreferences)
-					return new PreferenceCell(room.getDepartments());
+					return new PreferenceCell(room.getDepartments(), iProperties);
 				else
 					return null;
 			}
@@ -746,10 +750,10 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 			return new AvailabilityCell(room, false);
 			
 		case DEPARTMENTS:
-			return new DepartmentCell(true, room.getDepartments(), room.getControlDepartment(), isAllDepartments(room));
+			return new DepartmentCell(true, room.getDepartments(), room.getControlDepartment(), isAllDepartments(room), iProperties);
 		
 		case CONTROL_DEPT:
-			return new DepartmentCell(true, room.getControlDepartment());
+			return new DepartmentCell(true, iProperties, room.getControlDepartment());
 		
 		case EXAM_TYPES:
 			return new ExamTypesCell(room.getUniqueId(), room.getExamTypes());
@@ -764,7 +768,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		
 		case EVENT_DEPARTMENT:
 			if (room.getEventDepartment() == null) return null;
-			final DepartmentCell edc = new DepartmentCell(false, room.getEventDepartment());
+			final DepartmentCell edc = new DepartmentCell(false, iProperties, room.getEventDepartment());
 			if (room.isCanSeeEventAvailability()) {
 				edc.addMouseOverHandler(new MouseOverHandler() {
 					@Override
@@ -811,18 +815,18 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		
 		case GROUPS:
 			if (room.getGroups().isEmpty()) return null;
-			return new GroupsCell(room.getGroups());
+			return new GroupsCell(room.getGroups(), iProperties);
 
 		case FEATURES:
 			if (idx == 0) {
 				List<FeatureInterface> features = room.getFeatures((Long)null);
 				if (features.isEmpty()) return null;
-				return new FeaturesCell(features);
+				return new FeaturesCell(features, iProperties);
 			} else {
 				FeatureTypeInterface type = getFeatureType(idx - 1);
 				List<FeatureInterface> featuresOfType = room.getFeatures(type);
 				if (featuresOfType.isEmpty()) return null;
-				return new FeaturesCell(featuresOfType);
+				return new FeaturesCell(featuresOfType, iProperties);
 			}
 		case SERVICES:
 			if (!room.hasServices()) return null;
@@ -851,9 +855,9 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		}
 		
 		int row = addRow(room, widgets);
-		getRowFormatter().setStyleName(row, "row");
+		getRowFormatter().addStyleName(row, "row");
 		for (int col = 0; col < getCellCount(row); col++)
-			getCellFormatter().setStyleName(row, col, "cell");
+			getCellFormatter().addStyleName(row, col, "cell");
 		
 		if (!isVisible()) setVisible(true);
 		
@@ -939,7 +943,10 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 			if (iDepartment != null && iProperties != null && iProperties.isCanSeeCourses()) {
 				for (DepartmentInterface d: room.getDepartments()) {
 					if (iDepartment.equals(d.getDeptCode()) && d.getPreference() != null) {
-						getElement().getStyle().setColor(d.getPreference().getColor());
+						if (d.getPreference().hasStyle())
+							addStyleName(d.getPreference().getStyle());
+						else
+							getElement().getStyle().setColor(d.getPreference().getColor());
 						room.setPrefix(d.getPreference().getName());
 					}
 				}
@@ -973,7 +980,10 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 			if (iDepartment != null && iProperties != null && iProperties.isCanSeeCourses()) {
 				for (DepartmentInterface d: room.getDepartments()) {
 					if (iDepartment.equals(d.getDeptCode()) && d.getPreference() != null) {
-						getElement().getStyle().setColor(d.getPreference().getColor());
+						if (d.getPreference().hasStyle())
+							addStyleName(d.getPreference().getStyle());
+						else
+							getElement().getStyle().setColor(d.getPreference().getColor());
 						room.setPrefix(d.getPreference().getName());
 					}
 				}
@@ -1012,11 +1022,27 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 			if (iDepartment != null && iProperties != null && iProperties.isCanSeeCourses()) {
 				for (DepartmentInterface d: room.getDepartments()) {
 					if (iDepartment.equals(d.getDeptCode()) && d.getPreference() != null) {
-						getElement().getStyle().setColor(d.getPreference().getColor());
+						if (d.getPreference().hasStyle())
+							addStyleName(d.getPreference().getStyle());
+						else
+							getElement().getStyle().setColor(d.getPreference().getColor());
 						room.setPrefix(d.getPreference().getName());
 					}
 				}
 			}
+		}
+	}
+	
+	public static void setColor(P w, String color, RoomPropertiesInterface properties) {
+		if (color == null) return;
+		if (properties == null || !properties.isHighContrastColors()) {
+			w.getElement().getStyle().setColor(color);
+		} else if (ToolBox.contrast(color, "#ffffff") >= 4.5 || ToolBox.contrast(color, "#ffffff") > ToolBox.contrast(color, "#000000")) {
+			w.getElement().getStyle().setColor(color);
+			w.addStyleName("pref-2");
+		} else {
+			w.getElement().getStyle().setBackgroundColor(color);
+			w.addStyleName("pref-0");
 		}
 	}
 	
@@ -1034,7 +1060,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 	public static class FeaturesCell extends P implements HasRefresh {
 		Map<FeatureInterface, P> iFeatures = new HashMap<FeatureInterface, P>();
 		
-		public FeaturesCell(List<? extends FeatureInterface> features) {
+		public FeaturesCell(List<? extends FeatureInterface> features, RoomPropertiesInterface props) {
 			super();
 			setStyleName("features");
 			for (FeatureInterface feature: features) {
@@ -1043,8 +1069,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 				if (feature.getTitle() != null) p.setTitle(feature.getTitle());
 				if (feature.getDepartment() != null) {
 					p.setText(feature.getLabel() + " (" + RoomsTable.toString(feature.getDepartment(), true) + ")");
-					if (feature.getDepartment().getColor() != null)
-						p.getElement().getStyle().setColor(feature.getDepartment().getColor());
+					setColor(p, feature.getDepartment().getColor(), props);
 				}
 				iFeatures.put(feature, p);
 				add(p);
@@ -1065,7 +1090,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 	public static class GroupsCell extends P implements HasRefresh {
 		Map<GroupInterface, P> iGroups = new HashMap<GroupInterface, P>();
 		
-		public GroupsCell(List<? extends GroupInterface> groups) {
+		public GroupsCell(List<? extends GroupInterface> groups, RoomPropertiesInterface props) {
 			super();
 			setStyleName("groups");
 			for (GroupInterface group: groups) {
@@ -1074,8 +1099,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 				if (group.getTitle() != null) p.setTitle(group.getTitle());
 				if (group.getDepartment() != null) {
 					p.setText(group.getLabel() + " (" + RoomsTable.toString(group.getDepartment(), true) + ")");
-					if (group.getDepartment().getColor() != null)
-						p.getElement().getStyle().setColor(group.getDepartment().getColor());
+					setColor(p, group.getDepartment().getColor(), props);
 				}
 				iGroups.put(group, p);
 				add(p);
@@ -1191,7 +1215,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		boolean iExt;
 		Map<DepartmentInterface, P> iP = new HashMap<DepartmentInterface, P>();
 		
-		public DepartmentCell(boolean ext, DepartmentInterface... departments) {
+		public DepartmentCell(boolean ext, RoomPropertiesInterface props, DepartmentInterface... departments) {
 			super("departments");
 			iExt = ext;
 			for (DepartmentInterface department: departments) {
@@ -1199,14 +1223,13 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 				P p = new P("department");
 				p.setText(RoomsTable.toString(department, iExt));
 				if (department.getTitle() != null) p.setTitle(department.getTitle());
-				if (department.getColor() != null)
-					p.getElement().getStyle().setColor(department.getColor());
+				setColor(p, department.getColor(), props);
 				add(p);
 				iP.put(department, p);
 			}
 		}
 		
-		public DepartmentCell(boolean ext, List<DepartmentInterface> departments, DepartmentInterface control, boolean all) {
+		public DepartmentCell(boolean ext, List<DepartmentInterface> departments, DepartmentInterface control, boolean all, RoomPropertiesInterface props) {
 			super("departments");
 			iExt = ext;
 			if (all) {
@@ -1219,8 +1242,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 					P p = new P("department");
 					p.setText(RoomsTable.toString(department, iExt));
 					if (department.getTitle() != null) p.setTitle(department.getTitle());
-					if (department.getColor() != null)
-						p.getElement().getStyle().setColor(department.getColor());
+					setColor(p, department.getColor(), props);
 					if (department.equals(control))
 						p.addStyleName("control");
 					iP.put(department, p);
@@ -1237,9 +1259,10 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 	}
 	
 	public static class PreferenceCell extends DepartmentCell {
-		public PreferenceCell(List<DepartmentInterface> departments) {
-			super(true);
+		public PreferenceCell(List<DepartmentInterface> departments, RoomPropertiesInterface props) {
+			super(true, props);
 			boolean abbv = RoomCookie.getInstance().getDeptMode() <= 1;
+			
 			for (DepartmentInterface department: departments) {
 				if (department.getPreference() == null) continue;
 				P p = new P("department");
@@ -1250,17 +1273,23 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 					p.setText(MESSAGES.roomPreference(RoomsTable.toString(department, iExt), department.getPreference().getName()));
 				}
 				p.setTitle(department.getPreference().getName() + " " + department.getLabel());
-				p.getElement().getStyle().setColor(department.getPreference().getColor());
+				if (department.getPreference().hasStyle())
+					p.addStyleName(department.getPreference().getStyle());
+				else
+					p.getElement().getStyle().setColor(department.getPreference().getColor());
 				iP.put(department, p);
 				add(p);
 			}
 		}
 		
-		public PreferenceCell(DepartmentInterface department) {
-			super(true);
+		public PreferenceCell(DepartmentInterface department, RoomPropertiesInterface props) {
+			super(true, props);
 			setText(department.getPreference().getName());
 			setTitle(department.getPreference().getName() + " " + department.getLabel());
-			getElement().getStyle().setColor(department.getPreference().getColor());
+			if (department.getPreference().hasStyle())
+				addStyleName(department.getPreference().getStyle());
+			else
+				getElement().getStyle().setColor(department.getPreference().getColor());
 		}
 		
 		@Override
@@ -1343,6 +1372,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 				iPopupWidget = new P("unitime-RoomPictureHint");
 				Image image = new Image(GWT.getHostPageBaseURL() + "picture?id=" + iPicture.getUniqueId());
 				image.setStyleName("picture");
+				image.setAltText(iPicture.getName());
 				iPopupWidget.add(image);
 				P caption = new P("caption");
 				caption.setText(iPicture.getName() + (iPicture.getPictureType() == null ? "" : " (" + iPicture.getPictureType().getAbbreviation() + ")"));
@@ -1356,6 +1386,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 	public static class LinkCell extends ImageLink {
 		LinkCell(RoomPictureInterface picture) {
 			super(new Image(RESOURCES.download()), GWT.getHostPageBaseURL() + "picture?id=" + picture.getUniqueId());
+			getImage().setAltText(ARIA.iconDownload(picture.getName()));
 			setStyleName("link");
 			setTitle(picture.getName() + (picture.getPictureType() == null ? "" : " (" + picture.getPictureType().getLabel() + ")"));
 			setText(picture.getName() + (picture.getPictureType() == null ? "" : " (" + picture.getPictureType().getAbbreviation() + ")"));
@@ -1436,6 +1467,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 					}
 				} else {
 					Image availability = new Image(GWT.getHostPageBaseURL() + "pattern?loc=" + iRoom.getUniqueId() + "&e=1&v=" + (cookie.areRoomsHorizontal() ? "0" : "1") + (cookie.hasMode() ? "&s=" + cookie.getMode() : ""));
+					availability.setAltText(MESSAGES.colAvailability().replace("<br>", " "));
 					availability.setStyleName("grid");
 					add(availability);
 				}
@@ -1448,6 +1480,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 					}
 				} else {
 					Image availability = new Image(GWT.getHostPageBaseURL() + "pattern?loc=" + iRoom.getUniqueId() + "&v=" + (cookie.areRoomsHorizontal() ? "0" : "1") + (cookie.hasMode() ? "&s=" + cookie.getMode() : ""));
+					availability.setAltText(MESSAGES.colAvailability().replace("<br>", " "));
 					availability.setStyleName("grid");
 					add(availability);
 				}
@@ -1491,8 +1524,10 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 				if (iRoom.getPeriodPreference() != null)
 					setHTML(iRoom.getPeriodPreference());
 			} else {
-				add(new Image(GWT.getHostPageBaseURL() + "pattern?loc=" + iRoom.getUniqueId() + "&xt=" + iType.getId() +
-						"&v=" + (cookie.areRoomsHorizontal() ? "0" : "1") + (cookie.hasMode() ? "&s=" + cookie.getMode() : "")));
+				Image img = new Image(GWT.getHostPageBaseURL() + "pattern?loc=" + iRoom.getUniqueId() + "&xt=" + iType.getId() +
+						"&v=" + (cookie.areRoomsHorizontal() ? "0" : "1") + (cookie.hasMode() ? "&s=" + cookie.getMode() : ""));
+				img.setAltText(MESSAGES.colPeriodPreferences().replace("<br>", " "));
+				add(img);
 			}
 		}
 	}
@@ -1501,18 +1536,15 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		public boolean isChecked();
 	}
 	
-	public static enum DeptMode {
-		CODE(MESSAGES.fieldCode()),
-		ABBV(MESSAGES.fieldAbbreviation()),
-		NAME(MESSAGES.fieldName()),
-		ABBV_NAME(MESSAGES.fieldAbbv() + " - " + MESSAGES.fieldName()),
-		CODE_NAME(MESSAGES.fieldCode() + " - " + MESSAGES.fieldName());
-
-		private String iName;
-		
-		DeptMode(String name) { iName = name; }
-		
-		public String getName() { return iName; }
+	public static String getDeptModeLabel(DeptMode mode) {
+		switch(mode) {
+		case CODE: return MESSAGES.fieldCode();
+		case ABBV: return MESSAGES.fieldAbbreviation();
+		case NAME: return MESSAGES.fieldName();
+		case ABBV_NAME: return MESSAGES.fieldAbbv() + " - " + MESSAGES.fieldName();
+		case CODE_NAME: return MESSAGES.fieldCode() + " - " + MESSAGES.fieldName();
+		default: return mode.name();
+		}
 	}
 	
 	public static interface SortOperation extends Operation, HasColumnName {}
@@ -1534,6 +1566,7 @@ public class RoomsTable extends UniTimeTable<RoomDetailInterface>{
 		for (int i = 1; i < getRowCount(); i++) {
 			if (roomId.equals(getData(i).getUniqueId())) {
 				ToolBox.scrollToElement(getRowFormatter().getElement(i));
+				ToolBox.focusOnRow(getRowFormatter().getElement(i));
 			}
 		}
 	}

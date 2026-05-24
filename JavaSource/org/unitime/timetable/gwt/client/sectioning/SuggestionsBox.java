@@ -140,9 +140,12 @@ public class SuggestionsBox extends UniTimeDialogBox {
 		P label = new P("label");
 		label.setText(MESSAGES.filter());
 		iFilterPanel.add(label);
+		label.getElement().setId(DOM.createUniqueId());
 		
 		iFilter = new AriaTextBox();
 		iFilter.setStyleName("gwt-SuggestBox");
+		Roles.getTextboxRole().setAriaLabelledbyProperty(iFilter.getElement(), Id.of(label.getElement()));
+		
 		
 		HTML ariaDescription = new HTML(MESSAGES.suggestionsFilterHint(), false);
 		ariaDescription.setStyleName("unitime-AriaHiddenLabel");
@@ -227,6 +230,7 @@ public class SuggestionsBox extends UniTimeDialogBox {
 		iSuggestions.setEmptyMessage(MESSAGES.suggestionsLoading());
 		iSuggestionsScroll = new ScrollPanel(iSuggestions);
 		iSuggestionsScroll.setStyleName("unitime-ScrollPanel");
+		iSuggestionsScroll.getElement().setTabIndex(0);
 		panel.add(iSuggestionsScroll);
 		
 		if (iSpecReg != null) {
@@ -276,7 +280,7 @@ public class SuggestionsBox extends UniTimeDialogBox {
 		iCallback = new AsyncCallback<Collection<ClassAssignmentInterface>>() {
 			public void onFailure(Throwable caught) {
 				iSuggestions.clearData(true);
-				iSuggestions.setEmptyMessage("<font color='red'>" + caught.getMessage() + "</font>");
+				iSuggestions.setEmptyMessage("<span style='color:#ec0000;'>" + caught.getMessage() + "</span>");
 				iMessages.setHTML("");
 				LoadingWidget.getInstance().hide();
 				center();
@@ -701,7 +705,7 @@ public class SuggestionsBox extends UniTimeDialogBox {
 							}
 						}
 					}
-					TimeGrid w = (TimeGrid)iGrid.getPrintWidget(Math.min(900, Window.getClientWidth()));
+					TimeGrid w = (TimeGrid)iGrid.getPrintWidget(Math.min(1000, Window.getClientWidth()));
 					w.addStyleName("unitime-SuggestionsHintWidget");
 					iHint.setWidget(new SimplePanel(w));
 					iHint.setSize((w.getWidth() / 2) + "px", (w.getHeight() / 2) + "px");
@@ -774,11 +778,11 @@ public class SuggestionsBox extends UniTimeDialogBox {
 		case ARIA:
 			return (newVal != null && !newVal.isEmpty() ? newVal : oldVal != null ? oldVal : "");
 		case SINGLE:
-			return (newVal != null && !newVal.isEmpty() ? newVal : oldVal != null ? "<font color='"+ (conflict ? "red" : selected ? "#9999FF" : "#999999") +"'>" + oldVal + "</font>" : null);
+			return (newVal != null && !newVal.isEmpty() ? newVal : oldVal != null ? "<span style='color:"+ (conflict ? "#ec0000" : selected ? "#9999FF" : "#999999") +";'>" + oldVal + "</span>" : null);
 		case BOTH_OLD:
-			return (oldVal == null || oldVal.isEmpty() ? newVal : newVal == null || newVal.isEmpty() ? "<font color='" + (conflict ? "red" : selected ? "#9999FF" : "#999999") + "'>" + oldVal + "</font>" : oldVal.equals(newVal) ? oldVal : "<font color='" + ( selected ? "#9999FF" : "#999999" ) + "'>" + oldVal + "</font>");
+			return (oldVal == null || oldVal.isEmpty() ? newVal : newVal == null || newVal.isEmpty() ? "<span style='color:" + (conflict ? "#ec0000" : selected ? "#9999FF" : "#999999") + ";'>" + oldVal + "</span>" : oldVal.equals(newVal) ? oldVal : "<span style='color:'" + ( selected ? "#9999FF" : "#999999" ) + ";'>" + oldVal + "</span>");
 		case BOTH_NEW:
-			return (oldVal != null && !oldVal.isEmpty() && newVal != null && !newVal.isEmpty() && !newVal.equals(oldVal) ? "<font color='#" + ( selected ? "#9999FF" : "#999999" ) + "'>&rarr;</font> " + newVal : null);
+			return (oldVal != null && !oldVal.isEmpty() && newVal != null && !newVal.isEmpty() && !newVal.equals(oldVal) ? "<span style='color:" + ( selected ? "#9999FF" : "#999999" ) + ";'>&rarr;</span> " + newVal : null);
 		default:
 			return newVal;
 		}

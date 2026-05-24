@@ -129,6 +129,8 @@ public class CourseSelectionSuggestBox extends P implements CourseSelection {
 		iFinderButton = new ImageButton(RESOURCES.search_picker(), RESOURCES.search_picker_Down(), RESOURCES.search_picker_Over(), RESOURCES.search_picker_Disabled());
 		iFinderButton.setTabIndex(-1);
 		iFinderButton.addStyleName("button");
+		iFinderButton.setAltText(ARIA.openCourseFinder());
+		Roles.getButtonRole().remove(iFinderButton.getElement());
 		add(iFinderButton);
 		
 		iError = new Label();
@@ -408,7 +410,7 @@ public class CourseSelectionSuggestBox extends P implements CourseSelection {
 		private RequestedCourse iSuggestion = null;
 		
 		public SimpleSuggestion(Throwable error) {
-			iDisplay = "<font color='red'>"+error.getMessage()+"</font>";
+			iDisplay = "<span style='color:#ec0000;'>"+error.getMessage()+"</span>";
 			iReplace = "";
 			iStatus = error.getMessage();
 		}

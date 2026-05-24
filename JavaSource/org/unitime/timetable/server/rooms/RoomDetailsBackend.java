@@ -27,6 +27,7 @@ import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,6 +172,7 @@ public class RoomDetailsBackend extends RoomFilterBackend {
 			if (dist != null)
 				e.setProperty("distance", String.valueOf(dist == null ? 0l : Math.round(dist)));
 			e.setProperty("overbook", context.hasPermission(location, Right.EventLocationOverbook) ? "1" : "0");
+			
 			response.addResult(e);
 		}
 	}
@@ -187,8 +189,13 @@ public class RoomDetailsBackend extends RoomFilterBackend {
 		department.setExtAbbreviation(d.getExternalMgrAbbv());
 		department.setExtLabel(d.getExternalMgrLabel());
 		department.setTitle(d.getLabel());
-		if (pref != null && !PreferenceLevel.sNeutral.equals(pref.getPrefProlog()))
-			department.setPreference(new PreferenceInterface(pref.getUniqueId(), PreferenceLevel.prolog2color(pref.getPrefProlog()), pref.getPrefProlog(), pref.getPrefName(), pref.getAbbreviation(), false));
+		if (pref != null && !PreferenceLevel.sNeutral.equals(pref.getPrefProlog())) {
+			boolean prefStyles = CommonValues.Yes.eq(UserProperty.HighContrastPreferences.get());
+			department.setPreference(new PreferenceInterface(pref.getUniqueId(),
+					PreferenceLevel.prolog2color(pref.getPrefProlog()), PreferenceLevel.prolog2bgColor(pref.getPrefProlog()),
+					pref.getPrefProlog(), pref.getPrefName(), pref.getAbbreviation(), false,
+					prefStyles ? "pref-" + PreferenceLevel.prolog2char(pref.getPrefProlog()) : null));
+		}
 		if (location != null)
 			department.setColor("#" + d.getRoomSharingColor(null));
 		return department;
@@ -424,6 +431,13 @@ public class RoomDetailsBackend extends RoomFilterBackend {
     			sLog.error("Failed to get room URL: " + e.getMessage(), e);
     		}
     	}
+    	
+		if (response.hasDepartments())
+			Collections.sort(response.getDepartments());
+		if (response.hasFeatures())
+			Collections.sort(response.getFeatures());
+		if (response.hasGroups())
+			Collections.sort(response.getGroups());
 
     	return response;
 	}

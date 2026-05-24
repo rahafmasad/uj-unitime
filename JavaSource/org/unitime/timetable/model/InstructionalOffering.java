@@ -843,4 +843,27 @@ public class InstructionalOffering extends BaseInstructionalOffering {
 		}
 		return ret;
     }
+	
+	public boolean hasSchedulingDisclaimer() {
+    	for (InstrOfferingConfig config: getInstrOfferingConfigs())
+    		if (config.hasSchedulingDisclaimer()) return true;
+    	return false;
+    }
+	
+	@Transient
+    public String getFirstSchedulingDisclaimer() {
+    	for (InstrOfferingConfig config: getInstrOfferingConfigs())
+    		if (config.hasSchedulingDisclaimer()) return config.getSchedulingDisclaimer();
+    	return null;
+    }
+	
+    public boolean hasMultipleSchedulingDisclaimers() {
+    	String last = null;
+    	for (InstrOfferingConfig config: getInstrOfferingConfigs()) {
+    		String disc = (config.hasSchedulingDisclaimer() ? config.getSchedulingDisclaimer() : "");
+    		if (last != null && !last.equals(disc)) return true;
+    		last = disc;
+    	}
+    	return false;
+    }
 }

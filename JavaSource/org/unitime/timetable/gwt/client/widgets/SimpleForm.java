@@ -19,6 +19,8 @@
 */
 package org.unitime.timetable.gwt.client.widgets;
 
+import org.unitime.timetable.gwt.client.ToolBox;
+
 import com.google.gwt.aria.client.Id;
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.dom.client.Element;
@@ -101,7 +103,7 @@ public class SimpleForm extends FlexTable {
 	public int addRow(String text, Widget widget) {
 		return addRow(text, widget, iColSpan - 1);
 	}
-
+	
 	public int addRow(String text, Widget widget, int colspan) {
 		return addRow(new Label(text), widget, colspan);
 	}
@@ -110,7 +112,19 @@ public class SimpleForm extends FlexTable {
 		return addRow(header, widget, iColSpan - 1);
 	}
 	
+	public int addRow(String text, Widget widget, Element inputElement) {
+		return addRow(new Label(text), widget, iColSpan - 1, inputElement);
+	}
+	
+	public int addRow(Widget header, Widget widget, Element inputElement) {
+		return addRow(header, widget, iColSpan - 1, inputElement);
+	}
+	
 	public int addRow(Widget header, Widget widget, int colSpan) {
+		return addRow(header, widget, colSpan, ToolBox.firstInputElement(widget.getElement()));
+	}
+	
+	public int addRow(Widget header, Widget widget, int colSpan, Element inputElement) {
 		header.addStyleName("label-cell");
 		int row = getRowCount();
 		setWidget(row, 0, header);
@@ -129,10 +143,8 @@ public class SimpleForm extends FlexTable {
 			getFlexCellFormatter().setColSpan(row, 1, colSpan);
 		if (header.getElement().getId() == null || header.getElement().getId().isEmpty())
 			header.getElement().setId(DOM.createUniqueId());
-		if (widget instanceof UniTimeWidget)
-			Roles.getTextboxRole().setAriaLabelledbyProperty(((UniTimeWidget)widget).getWidget().getElement(), Id.of(header.getElement()));
-		else
-			Roles.getTextboxRole().setAriaLabelledbyProperty(widget.getElement(), Id.of(header.getElement()));
+		if (inputElement != null && Roles.getTextboxRole().getAriaLabelProperty(inputElement).isEmpty())
+			Roles.getTextboxRole().setAriaLabelledbyProperty(inputElement, Id.of(header.getElement()));
 		return row;
 	}
 	
@@ -172,16 +184,14 @@ public class SimpleForm extends FlexTable {
 		if (c2 != 1) getFlexCellFormatter().setColSpan(row, 3, c2);
 		if (header1.getElement().getId() == null || header1.getElement().getId().isEmpty())
 			header1.getElement().setId(DOM.createUniqueId());
-		if (widget1 instanceof UniTimeWidget)
-			Roles.getTextboxRole().setAriaLabelledbyProperty(((UniTimeWidget)widget1).getWidget().getElement(), Id.of(header1.getElement()));
-		else
-			Roles.getTextboxRole().setAriaLabelledbyProperty(widget1.getElement(), Id.of(header1.getElement()));
+		Element inputElement = ToolBox.firstInputElement(widget1.getElement());
+		if (inputElement != null)
+			Roles.getTextboxRole().setAriaLabelledbyProperty(inputElement, Id.of(header1.getElement()));
 		if (header2.getElement().getId() == null || header2.getElement().getId().isEmpty())
 			header2.getElement().setId(DOM.createUniqueId());
-		if (widget2 instanceof UniTimeWidget)
-			Roles.getTextboxRole().setAriaLabelledbyProperty(((UniTimeWidget)widget2).getWidget().getElement(), Id.of(header2.getElement()));
-		else
-			Roles.getTextboxRole().setAriaLabelledbyProperty(widget2.getElement(), Id.of(header2.getElement()));
+		inputElement = ToolBox.firstInputElement(widget2.getElement());
+		if (inputElement != null)
+			Roles.getTextboxRole().setAriaLabelledbyProperty(inputElement, Id.of(header2.getElement()));
 		return row;
 	}
 	

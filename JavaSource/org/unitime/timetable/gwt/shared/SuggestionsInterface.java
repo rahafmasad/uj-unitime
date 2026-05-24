@@ -813,8 +813,8 @@ public class SuggestionsInterface implements IsSerializable, Serializable {
 		private int iPreference;
 		
 		public PreferenceInterface() {}
-		public PreferenceInterface(Long id, String color, String code, String name, String abbv, int preference) {
-			super(id, color, code, name, abbv, true);
+		public PreferenceInterface(Long id, String color, String bgColor, String code, String name, String abbv, int preference, String style) {
+			super(id, color, bgColor, code, name, abbv, true, style);
 			iPreference = preference;
 		}
 		

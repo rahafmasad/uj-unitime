@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import org.unitime.timetable.gwt.client.rooms.RoomSharingWidget.FP;
 import org.unitime.timetable.gwt.client.solver.SolverCookie;
 import org.unitime.timetable.gwt.client.widgets.P;
 import org.unitime.timetable.gwt.client.widgets.UniTimeTable;
@@ -233,18 +234,18 @@ public class ConflictTable extends UniTimeTable<ClassAssignmentDetails> implemen
 	protected Widget getCell(final ClassAssignmentDetails conflict, final ConflictColum column, final int idx) {
 		switch (column) {
 		case DATE:
-			return iContext.createDateLabel(conflict.getTime().getDatePattern());
+			return iContext.createDateLabel(conflict.getTime().getDatePattern(), true);
 		case TIME:
-			return iContext.createTimeLabel(conflict.getTime(), conflict.getClazz().getClassId(), true);
+			return iContext.createTimeLabel(conflict.getTime(), conflict.getClazz().getClassId(), true, true);
 		case STUDENT_CONFLICTS:
 			if (conflict.hasStudentConflicts()) {
-				return new ConflictCell(SuggestionsPageContext.dispNumber(conflict.countStudentConflicts()), iContext.createStudentConflicts(conflict.getStudentConflicts()), SolverCookie.getInstance().isShowAllStudentConflicts());
+				return new ConflictCell(iContext.dispNumber(conflict.countStudentConflicts()), iContext.createStudentConflicts(conflict.getStudentConflicts()), SolverCookie.getInstance().isShowAllStudentConflicts());
 			} else {
 				return null;
 			}
 		case DISTRIBUTION_CONFLICTS:
 			if (conflict.hasDistributionConflicts()) {
-				return new ConflictCell(SuggestionsPageContext.dispNumber(conflict.countDistributionConflicts()), iContext.createViolatedConstraints(conflict.getDistributionConflicts(), null), SolverCookie.getInstance().isShowAllDistributionConflicts());
+				return new ConflictCell(iContext.dispNumber(conflict.countDistributionConflicts()), iContext.createViolatedConstraints(conflict.getDistributionConflicts(), null, false), SolverCookie.getInstance().isShowAllDistributionConflicts());
 			} else {
 				return null;
 			}
@@ -401,7 +402,7 @@ public class ConflictTable extends UniTimeTable<ClassAssignmentDetails> implemen
 			super("conflicts");
 			iN = new P("number"); iN.setHTML(number);
 			add(iN);
-			iD = new P("dots"); iD.setHTML(CONSTANTS.selectionMore());
+			iD = new FP("dots"); iD.setHTML(CONSTANTS.selectionMore());
 			add(iD);
 			iL = new P("list");
 			add(iL);

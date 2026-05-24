@@ -152,7 +152,8 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
         	if (datePattern.getDatePatternType() != DatePatternType.PatternSet) {
             	c.addClick().setTitle(MSG.sectPreviewOfDatePattern(datePattern.getName()))
         			.addWidget().setId("UniTimeGWT:DatePattern").setContent(datePattern.getPatternText());
-            	c.setImage().setSource("images/calendar.png").addStyle("cursor: pointer; padding-left: 5px; vertical-align: bottom;");
+            	c.setImage().setSource("images/calendar.png").addStyle("cursor: pointer; padding-left: 5px; vertical-align: bottom;")
+            		.setAlt(MSG.sectPreviewOfDatePattern(datePattern.getName()));
         	}
         } else {
         	datePattern = clazz.effectiveDatePattern();
@@ -161,7 +162,8 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
             	if (datePattern.getDatePatternType() != DatePatternType.PatternSet) {
             		c.addClick().setTitle(MSG.sectPreviewOfDatePattern(datePattern.getName()))
             			.addWidget().setId("UniTimeGWT:DatePattern").setContent(datePattern.getPatternText());
-            		c.setImage().setSource("images/calendar.png").addStyle("cursor: pointer; padding-left: 5px; vertical-align: bottom;");
+            		c.setImage().setSource("images/calendar.png").addStyle("cursor: pointer; padding-left: 5px; vertical-align: bottom;")
+            			.setAlt(MSG.sectPreviewOfDatePattern(datePattern.getName()));
             	}
         	}
         }
@@ -254,7 +256,7 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
         				response.getProperties().getProperties().add(0,
         					new PropertyInterface().setCell(new CellInterface()
         						.setText(MSG.datePatternCommittedIsDifferent(clazz.getClassLabel(), a.getDatePattern().getName(), clazz.effectiveDatePattern().getName()))
-        						.setColor("red")));
+        						.setColor("#e00")));
         			}
         		}
         	}
@@ -309,7 +311,7 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
     		response.addOperation("next");
     	if (context.hasPermission(Right.ExaminationAdd))
     		response.addOperation("add-exam");
-    	if (context.hasPermission(clazz.getManagingDept(), Right.DistributionPreferenceAdd) && context.hasPermission(clazz, Right.DistributionPreferenceClass)) {
+    	if (context.hasPermission(Right.DistributionPreferenceAdd) && context.hasPermission(clazz, Right.DistributionPreferenceClass)) {
     		if (ApplicationProperty.LegacyDistributions.isTrue())
     			response.addOperation("add-distribution-legacy");
     		else
@@ -327,7 +329,7 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
 		TableInterface response = new TableInterface();
         if (clazz.isCancelled())
         	response.addProperty("").setText(MSG.classNoteCancelled(clazz.getClassLabel()))
-        		.setColor("red").addStyle("font-weight: bold;");
+        		.setColor("#ee0000").addStyle("font-weight: bold;");
 		
 		response.addProperty(MSG.filterManager()).add(clazz.getManagingDept().getManagingDeptLabel());
         if (clazz.getParentClass() != null) {
@@ -386,15 +388,20 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
 		CellInterface c = new CellInterface();
 		c.add(other.getClazz().getName()).setUrl("clazz?id=" + other.getClazz().getClassId()).setClassName("link");
 		c.add(" ");
-		c.addItem(other.getTime().toCell());
-		c.add(" ");
-		c.add(other.getTime().getDatePatternName()).setColor(PreferenceLevel.int2color(other.getTime().getDatePatternPreference()));
-        for (int i=0;i<other.getRoom().length;i++) {
-        	if (i>0) c.add(", ");
-        	else c.add(" ");
-        	RoomInfo room = other.getRoom()[i];
-        	c.addItem(room.toCell());
-        }
+		if (other.getTime() == null)
+			c.add(MSG.messageNotAssigned()).addStyle("font-style: italic;");
+		else { 
+			c.addItem(other.getTime().toCell());
+			c.add(" ");
+			c.add(other.getTime().getDatePatternName()).setColor(PreferenceLevel.int2color(other.getTime().getDatePatternPreference()));
+		}
+		if (other.getRoom() != null)
+	        for (int i=0;i<other.getRoom().length;i++) {
+	        	if (i>0) c.add(", ");
+	        	else c.add(" ");
+	        	RoomInfo room = other.getRoom()[i];
+	        	c.addItem(room.toCell());
+	        }
 		return c;
 	}
 	
@@ -490,7 +497,8 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
 				for (Enumeration f=gc.getClassIds().elements();f.hasMoreElements();) {
 					Long classId = (Long)f.nextElement();
 					ClassAssignmentDetails other = ClassAssignmentDetails.createClassAssignmentDetails(context, solver, classId, false);
-					g.addItem(toCell(other).setInline(false));
+					if (other.getTime() != null)
+						g.addItem(toCell(other).setInline(false));
 				}
 			}
 		}
@@ -649,6 +657,7 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
 	
 	public static TableInterface getPreferenceTable(SessionContext context, Class_ clazz, Preference.Type... types) {
 		TableInterface preferences = SubpartDetailBackend.getPreferenceTable(context, clazz, types);
+		boolean prefStyles = CommonValues.Yes.eq(UserProperty.HighContrastPreferences.get(context.getUser()));
         if (preferences != null) {
             if (clazz.getNbrRooms()>0) {
         		if (clazz.hasRoomIndexedPrefs()) {
@@ -657,7 +666,7 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
         				CellInterface cell = table.addProperty(MSG.itemOnlyRoom(1 + roomIndex) + ":");
         				List<RoomLocation> roomLocations = TimetableDatabaseLoader.computeRoomLocations(clazz, roomIndex);
                 		if (roomLocations.isEmpty()) {
-                			cell.add(MSG.warnNoRoomsAreAvaliable()).setColor("red").addStyle("font-weight: bold;");
+                			cell.add(MSG.warnNoRoomsAreAvaliable()).setColor("#ee0000").addStyle("font-weight: bold;");
                 		} else {
             				int idx = 0;
                     		for (RoomLocation rl: roomLocations) {
@@ -665,7 +674,10 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
                 				if (idx==6)
                 					cell = cell.add(MSG.moreAvailableRooms(roomLocations.size() - 6)).setDots(true);
                 				CellInterface c = cell.add(rl.getName());
-                				c.setColor(PreferenceLevel.int2color(rl.getPreference()));
+                				if (prefStyles)
+                					c.setClassName("pref-" + PreferenceLevel.prolog2char(PreferenceLevel.int2prolog(rl.getPreference())));
+                				else
+                					c.setColor(PreferenceLevel.int2color(rl.getPreference()));
                 				c.setMouseOver("$wnd.showGwtRoomHint($wnd.lastMouseOverElement, '" + rl.getId() + "', '" + PreferenceLevel.int2string(rl.getPreference()) + "');");
                 				c.setMouseOut("$wnd.hideGwtRoomHint();");                						
                 				idx++;
@@ -680,17 +692,20 @@ public class ClassDetailBackend implements GwtRpcImplementation<ClassDetailReque
                 	preferences.getProperties().add(preferences.getProperties().size() - 1,
         					new PropertyInterface().setName(MSG.propertyAvailableRooms()).setCell(cell));
                 	if (roomLocations.isEmpty()) {
-            			cell.add(MSG.warnNoRoomsAreAvaliable()).setColor("red").addStyle("font-weight: bold;");
+            			cell.add(MSG.warnNoRoomsAreAvaliable()).setColor("#e00").addStyle("font-weight: bold;");
             		} else {
                 		if (roomLocations.size() < clazz.getNbrRooms())
-                    		cell.add(MSG.warnNotEnoughtRoomsAreAvaliable() + " ").setColor("red").addStyle("font-weight: bold;");
+                    		cell.add(MSG.warnNotEnoughtRoomsAreAvaliable() + " ").setColor("#e00").addStyle("font-weight: bold;");
         				int idx = 0;
                 		for (RoomLocation rl: roomLocations) {
                 			if (idx>0) cell.add(", ");
             				if (idx==6)
             					cell = cell.add(MSG.moreAvailableRooms(roomLocations.size() - 6)).setDots(true);
             				CellInterface c = cell.add(rl.getName());
-            				c.setColor(PreferenceLevel.int2color(rl.getPreference()));
+            				if (prefStyles)
+            					c.setClassName("pref-" + PreferenceLevel.prolog2char(PreferenceLevel.int2prolog(rl.getPreference())));
+            				else
+            					c.setColor(PreferenceLevel.int2color(rl.getPreference()));
             				c.setMouseOver("$wnd.showGwtRoomHint($wnd.lastMouseOverElement, '" + rl.getId() + "', '" + PreferenceLevel.int2string(rl.getPreference()) + "');");
             				c.setMouseOut("$wnd.hideGwtRoomHint();");                						
             				idx++;

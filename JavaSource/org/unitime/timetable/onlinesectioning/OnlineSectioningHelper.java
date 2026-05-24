@@ -401,15 +401,15 @@ public class OnlineSectioningHelper implements ExternalClassNameHelperInterface 
     	public String toHtml() {
     		switch (iLevel) {
 			case DEBUG:
-	        	return "<font color='gray'>&nbsp;&nbsp;--" + iMessage + "</font>";
+	        	return "<span style='color:#646464;'>&nbsp;&nbsp;--" + iMessage + "</span>";
 			case INFO:
 				return iMessage;
 			case WARN:
-				return "<font color='orange'>" + iMessage + "</font>";
+				return "<span style='color:#b85c00;'>" + iMessage + "</span>";
 			case ERROR:
-				return "<font color='red'>" + iMessage + "</font>";
+				return "<span style='color:#ec0000;'>" + iMessage + "</span>";
 			case FATAL:
-				return "<font color='red'><b>" + iMessage + "</b></font>";
+				return "<span style='color:#ec0000;'><b>" + iMessage + "</b></span>";
 			default:
 				return iMessage;
     		}
@@ -776,10 +776,10 @@ public class OnlineSectioningHelper implements ExternalClassNameHelperInterface 
     			request.setWaitlistedTimeStamp(cr.getWaitListedTimeStamp().getTime());
         	request.setWaitList(cr.isWaitlist());
         	request.setNoSubs(cr.isNoSub());
-        	request.setCritical(cr.getCritical() == CourseDemand.Critical.CRITICAL.ordinal());
-        	request.setImportant(cr.getCritical() == CourseDemand.Critical.IMPORTANT.ordinal());
-        	request.setVital(cr.getCritical() == CourseDemand.Critical.VITAL.ordinal());
     	}
+    	request.setCritical(r.getCritical() == CourseDemand.Critical.CRITICAL.ordinal());
+    	request.setImportant(r.getCritical() == CourseDemand.Critical.IMPORTANT.ordinal());
+    	request.setVital(r.getCritical() == CourseDemand.Critical.VITAL.ordinal());
     	return request;
     }
     

@@ -325,9 +325,9 @@ public class TimetableGridSolutionHelper extends TimetableGridHelper {
 			
 			if (!cell.hasPreference()) {
 				cell.setPreference(
-					(assignmentInfo.getBestNormalizedTimePreference()<assignmentInfo.getNormalizedTimePreference()?"<span style='color:red'>"+(int)(assignmentInfo.getNormalizedTimePreference()-assignmentInfo.getBestNormalizedTimePreference())+"</span>":""+(int)(assignmentInfo.getNormalizedTimePreference()-assignmentInfo.getBestNormalizedTimePreference())) + ", " +
-					(assignmentInfo.getNrStudentConflicts()>0?"<span style='color:rgb(20,130,10)'>"+assignmentInfo.getNrStudentConflicts()+"</span>":""+assignmentInfo.getNrStudentConflicts()) + ", " +
-					(assignmentInfo.getBestRoomPreference()<roomPref?"<span style='color:blue'>"+(roomPref-assignmentInfo.getBestRoomPreference())+"</span>":""+(roomPref-assignmentInfo.getBestRoomPreference()))
+					(assignmentInfo.getBestNormalizedTimePreference()<assignmentInfo.getNormalizedTimePreference()?"<span class='bg-B'>"+(int)(assignmentInfo.getNormalizedTimePreference()-assignmentInfo.getBestNormalizedTimePreference())+"</span>":""+(int)(assignmentInfo.getNormalizedTimePreference()-assignmentInfo.getBestNormalizedTimePreference())) + ", " +
+					(assignmentInfo.getNrStudentConflicts()>0?"<span class='bg-G'>"+assignmentInfo.getNrStudentConflicts()+"</span>":""+assignmentInfo.getNrStudentConflicts()) + ", " +
+					(assignmentInfo.getBestRoomPreference()<roomPref?"<span class='bg-R'>"+(roomPref-assignmentInfo.getBestRoomPreference())+"</span>":""+(roomPref-assignmentInfo.getBestRoomPreference()))
 					);
 			}
 			cell.setProperty(Property.TimePreference, (int)assignmentInfo.getNormalizedTimePreference());
@@ -909,7 +909,7 @@ public class TimetableGridSolutionHelper extends TimetableGridHelper {
 		if (classIds.isEmpty()) return null;
 		
 		Query<Assignment> q = hibSession.createQuery(
-				"select distinct a from Assignment a where a.solution.uniqueId in ("+solutionIdsStr+") and a.classId in (:classIds)", Assignment.class);
+				"select distinct a from Assignment a where a.solution.uniqueId in ("+solutionIdsStr+") and a.clazz.uniqueId in (:classIds)", Assignment.class);
 		q.setParameterList("classIds", classIds, Long.class);
 		q.setCacheable(true);
 		List assignments = q.list();

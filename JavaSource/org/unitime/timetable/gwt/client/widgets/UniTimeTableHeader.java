@@ -29,9 +29,12 @@ import org.unitime.timetable.gwt.client.widgets.UniTimeTable.HasCellAlignment;
 import org.unitime.timetable.gwt.client.widgets.UniTimeTable.HasColSpan;
 import org.unitime.timetable.gwt.client.widgets.UniTimeTable.HasColumn;
 import org.unitime.timetable.gwt.client.widgets.UniTimeTable.HasStyleName;
+import org.unitime.timetable.gwt.client.widgets.UniTimeTable.TableHeaderCell;
 
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -48,7 +51,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Tomas Muller
  */
-public class UniTimeTableHeader extends HTML implements HasStyleName, HasCellAlignment, HasColSpan, HasAdditionalStyleNames, HasColumn {
+public class UniTimeTableHeader extends HTML implements HasStyleName, HasCellAlignment, HasColSpan, HasAdditionalStyleNames, HasColumn, TableHeaderCell {
 	private int iColSpan = 1, iColumn = -1;
 	private HorizontalAlignmentConstant iAlign;
 	private List<Operation> iOperations = new ArrayList<Operation>();
@@ -169,6 +172,11 @@ public class UniTimeTableHeader extends HTML implements HasStyleName, HasCellAli
 		return iAlign;
 	}
 	
+	@Override
+	public boolean isCanFocus() {
+		return !iOperations.isEmpty() || iClickHandler != null;
+	}
+	
 	public String getStyleName() {
 		return (iOperations.isEmpty() && iClickHandler == null ? "unitime-TableHeader" : "unitime-ClickableTableHeader");
 	}
@@ -233,13 +241,20 @@ public class UniTimeTableHeader extends HTML implements HasStyleName, HasCellAli
 		return iTitle;
 	}
 	
+	@Override
 	public void setOrder(Boolean order) {
 		iOrder = order;
 		super.setHTML(order == null ? iTitle : order ? "&uarr; " + iTitle : "&darr; " + iTitle);
 	}
 	
+	@Override
 	public Boolean getOrder() {
 		return iOrder;
+	}
+	
+	@Override
+	public String getName() {
+		return iTitle;
 	}
 	
 	public static class MenuBarWithAccessKeys extends MenuBar {
@@ -249,6 +264,13 @@ public class UniTimeTableHeader extends HTML implements HasStyleName, HasCellAli
 			super(true);
 			setFocusOnHoverEnabled(true);
 			sinkEvents(Event.ONKEYPRESS);
+			addDomHandler(new BlurHandler() {
+				@Override
+				public void onBlur(BlurEvent event) {
+					if (getSelectedItem() == null)
+						getParent().setVisible(false);
+				}
+			}, BlurEvent.getType());
 		}
 		
 		@Override

@@ -111,7 +111,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
 	protected static Formats.Format<Date> sDateFormat = Formats.getDateFormat(Formats.Pattern.DATE_EVENT_SHORT);
 	protected static DecimalFormat sRoomRatioFormat = new DecimalFormat("0.00");
 	
-    protected String disabledColor = "gray";
+    protected String disabledColor = "#6f6f6f";
     
     private boolean showLabel;
     private boolean showDivSec;
@@ -744,7 +744,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     
     protected CellInterface cellForTimePrefs(AssignmentInfo assignment, Set<TimePref> timePrefList, final boolean timeVertical, boolean gridAsText, String timeGridSize, boolean highlightClassPrefs){
     	CellInterface cell = new CellInterface();
-    	cell.setNoWrap(true);
+    	if (!isUsePrefStyles()) cell.setNoWrap(true);
     	for (TimePref tp: timePrefList) {
     		final RequiredTimeTable rtt = tp.getRequiredTimeTable(assignment == null ? null : assignment.getTimeLocation());
     		String owner = "";
@@ -765,11 +765,18 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     		}
         	if (gridAsText || rtt.getModel().isExactTime()) {
         		String hint = rtt.print(false, timeVertical, true, false, rtt.getModel().getName() + owner).replace(");\n</script>", "").replace("<script language=\"javascript\">\ndocument.write(", "").replace("\n", " ");
-        		cell.addItem(rtt.getModel().toCell()
-        			.setMouseOver("$wnd.showGwtHint($wnd.lastMouseOverElement, $wnd." + hint + ");")
-        			.setMouseOut("$wnd.hideGwtHint();")
-        			.addStyle(tp.getOwner() != null && tp.getOwner() instanceof Class_ && highlightClassPrefs ? "background: #ffa;" : "")
-        			.setInline(false));
+        		CellInterface c = rtt.getModel().toCell(isUsePrefStyles())
+    			.setMouseOver("$wnd.showGwtHint($wnd.lastMouseOverElement, $wnd." + hint + ");")
+    			.setMouseOut("$wnd.hideGwtHint();");
+        		cell.addItem(c);
+        		if (isUsePrefStyles()) {
+        			if (tp.getOwner() != null && tp.getOwner() instanceof Class_ && highlightClassPrefs && c.hasItems())
+        				for (CellInterface i: c.getItems())
+        					i.addStyle("border: 3px solid #ff0;");
+        		} else {
+        			c.addStyle(tp.getOwner() != null && tp.getOwner() instanceof Class_ && highlightClassPrefs ? "background: #ffa;" : "")
+        				.setInline(false);;
+        		}
         	} else {
         		rtt.getModel().setDefaultSelection(timeGridSize);
         		TimePatternModel tpm = ClassEditBackend.createTimePatternModel(tp, getSessionContext());
@@ -779,7 +786,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         				new ImageInterface().setSource("pattern?v=" + (timeVertical ? 1 : 0) + "&s=" + rtt.getModel().getDefaultSelection() + "&tp=" + tp.getTimePattern().getUniqueId() + "&p=" + rtt.getModel().getPreferences() +
             					(assignment == null || assignment.getTimeLocation() == null ? "" : "&as=" + assignment.getTimeLocation().getStartSlot() + "&ad=" + assignment.getTimeLocation().getDayCode()) +
             					(tp.getOwner() != null && tp.getOwner() instanceof Class_ && highlightClassPrefs ? "&hc=1" : "")
-            					).setAlt(rtt.getModel().toString())
+            					).setAlt(rtt.getModel().toString(), MSG.altNoPreferences())
         						.setGenerator(new ImageGenerator() {
         							public Object generate() {
         								return rtt.createBufferedImage(timeVertical);
@@ -821,7 +828,10 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     		CellInterface cell = initNormalCell("", isEditable); cell.setInline(false);
     		for (Object pref: prefGroup.effectivePreferences(prefType))
     			cell.addItem(preferenceCell((Preference)pref));
-    		if (!isSimple()) cell.setNoWrap(true);
+    		if (isUsePrefStyles())
+    			cell.setInline(true);
+    		else if (!isSimple())
+    			cell.setNoWrap(true);
     		return(cell);
     	}
     	
@@ -850,7 +860,10 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     	}
     	if (noRoomPrefs && ! cell.hasItems())
     		cell.setText(MSG.notApplicable()).addStyle("font-style: italic;");
-    	cell.setNoWrap(true);
+    	if (isUsePrefStyles())
+    		cell.setInline(true);
+    	else
+    		cell.setNoWrap(true);
     	return(cell);
     }
 
@@ -1069,6 +1082,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     			String note = c.getSchedulePrintNote().replaceAll("\\<.*?\\>", "");
     			if (CommonValues.NoteAsFullText.eq(getUser().getProperty(UserProperty.SchedulePrintNoteDisplay))) {
 	    			cell = initNormalCell(c.getSchedulePrintNote(), isEditable);
+	    			cell.setStyle("white-space: pre-wrap;");
 	    			cell.setTextAlignment(Alignment.LEFT);
     			} else if (CommonValues.NoteAsShortText.eq(getUser().getProperty(UserProperty.SchedulePrintNoteDisplay))) {
         			note = (note.length() <= 20 ? note : note.substring(0, 20) + "...");
@@ -1083,6 +1097,30 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     		} else {
         		cell = this.initNormalCell("" ,isEditable);
         	}
+    	}  else {
+       		cell = this.initNormalCell("" ,isEditable);   		
+    	}
+        return(cell);
+    }
+    
+    private CellInterface buildSchedulingDisclaimer(InstrOfferingConfig ioc, boolean isEditable){
+    	CellInterface cell = null;
+    	if (ioc.getSchedulingDisclaimer() != null && !ioc.getSchedulingDisclaimer().isEmpty()) {
+			String note = ioc.getSchedulingDisclaimer().replaceAll("\\<.*?\\>", "");
+			if (CommonValues.NoteAsFullText.eq(getUser().getProperty(UserProperty.SchedulePrintNoteDisplay))) {
+    			cell = initNormalCell(ioc.getSchedulingDisclaimer(), isEditable);
+    			cell.setStyle("white-space: pre-wrap;");
+    			cell.setTextAlignment(Alignment.LEFT);
+			} else if (CommonValues.NoteAsShortText.eq(getUser().getProperty(UserProperty.SchedulePrintNoteDisplay))) {
+    			note = (note.length() <= 20 ? note : note.substring(0, 20) + "...");
+				cell = initNormalCell(note, isEditable);
+				cell.setStyle("white-space: pre-wrap;");
+    			cell.setTextAlignment(Alignment.LEFT);
+			} else {
+				cell = initNormalCell("", isEditable);
+	    		cell.setImage(new ImageInterface().setSource("images/note.png").setTitle(note).setAlt(MSG.altHasSchedulePrintNote()));
+	    		cell.setTextAlignment(Alignment.CENTER);
+			}
     	}  else {
        		cell = this.initNormalCell("" ,isEditable);   		
     	}
@@ -1272,6 +1310,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
 			if (CommonValues.NoteAsShortText.eq(getUser().getProperty(UserProperty.ManagerNoteDisplay))) {
 				note = (note.length() <= 20 ? note : note.substring(0, 20) + "...");
 				cell = initNormalCell(note, isEditable);
+    			cell.setStyle("white-space: pre-wrap;");
     			cell.setTextAlignment(Alignment.LEFT);
 			} else if (CommonValues.NoteAsFullText.eq(getUser().getProperty(UserProperty.ManagerNoteDisplay))) {
 				cell = initNormalCell(offering.getNotes(), isEditable);
@@ -1347,7 +1386,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     		if (aClass.getNbrRooms()!=null && aClass.getNbrRooms().intValue()!=1) {
     			if (aClass.getNbrRooms().intValue()==0) {
     				cell = initNormalCell(MSG.notApplicable(), isEditable);
-    				cell.addStyle("color: gray; font-style: italic;");
+    				cell.addStyle("color: #767676; font-style: italic;");
     			} else if (Boolean.TRUE.equals(aClass.isRoomsSplitAttendance())) {
     				cell = initNormalCell(MSG.cellNbrRoomsAndRoomRatioSlitAttendance(aClass.getNbrRooms(), aClass.getRoomRatio() == null ? "0" : sRoomRatioFormat.format(aClass.getRoomRatio())), isEditable);
     				cell.setTitle(MSG.titleNbrRoomsAndRoomRatioSlitAttendance(aClass.getNbrRooms(), aClass.getRoomRatio() == null ? "0" : sRoomRatioFormat.format(aClass.getRoomRatio()))); 
@@ -1482,7 +1521,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         return(cell);
     }
 
-    protected void buildClassOrSubpartRow(ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, LineInterface row, CourseOffering co, PreferenceGroup prefGroup, int indentSpaces, boolean isEditable, String prevLabel){
+    protected void buildClassOrSubpartRow(ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, LineInterface row, CourseOffering co, PreferenceGroup prefGroup, int indentSpaces, boolean isEditable, String prevLabel, boolean printSchedDisc){
     	boolean classLimitDisplayed = false;
     	if (isShowLabel()){
 	        row.addCell(this.buildPrefGroupLabel(co, prefGroup, indentSpaces, isEditable, prevLabel));
@@ -1556,7 +1595,15 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     		row.addCell(this.initNormalCell("", isEditable));
     	}
     	if (isShowSchedulePrintNote()){
-            row.addCell(this.buildSchedulePrintNote(prefGroup, isEditable));     		
+    		if (printSchedDisc && prefGroup instanceof SchedulingSubpart) {
+    			SchedulingSubpart ss = (SchedulingSubpart)prefGroup;
+    			if (ss.getInstrOfferingConfig().getSchedulingDisclaimer() != null && !ss.getInstrOfferingConfig().getSchedulingDisclaimer().isEmpty())
+    				row.addCell(this.buildSchedulingDisclaimer(ss.getInstrOfferingConfig(), isEditable));
+    			else
+    				row.addCell(this.initNormalCell("", isEditable));
+    		} else {
+    			row.addCell(this.buildSchedulePrintNote(prefGroup, isEditable));
+    		}
     	} 
     	if (isShowNote()){
             row.addCell(this.buildNote(prefGroup, isEditable));
@@ -1593,7 +1640,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         }
     }
     
-    private void buildSchedulingSubpartRow(ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, TableInterface table, CourseOffering co, SchedulingSubpart ss, int indentSpaces){
+    private void buildSchedulingSubpartRow(ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, TableInterface table, CourseOffering co, SchedulingSubpart ss, int indentSpaces, boolean printSchedDisc){
     	boolean isEditable = getSessionContext().hasPermission(ss, Right.SchedulingSubpartDetail);
         boolean isOffered = !ss.getInstrOfferingConfig().getInstructionalOffering().isNotOffered();        
 
@@ -1602,14 +1649,14 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         if (isEditable && isOffered)
         	row.setURL("subpart?id="+ss.getUniqueId());
         
-        this.buildClassOrSubpartRow(classAssignment, examAssignment, row, co, ss, indentSpaces, isEditable, null);
+        this.buildClassOrSubpartRow(classAssignment, examAssignment, row, co, ss, indentSpaces, isEditable, null, printSchedDisc);
         if (isSimple()) row.setBgColor("#E1E1E1");
         table.addLine(row);
     }
     
-    private void buildSchedulingSubpartRows(Vector subpartIds, ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, TableInterface table, CourseOffering co, SchedulingSubpart ss, int indentSpaces){
+    private void buildSchedulingSubpartRows(Vector subpartIds, ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, TableInterface table, CourseOffering co, SchedulingSubpart ss, int indentSpaces, boolean printSchedDisc){
     	if (subpartIds!=null) subpartIds.add(ss.getUniqueId());
-        this.buildSchedulingSubpartRow(classAssignment, examAssignment, table, co, ss, indentSpaces);
+        this.buildSchedulingSubpartRow(classAssignment, examAssignment, table, co, ss, indentSpaces, printSchedDisc);
         Set childSubparts = ss.getChildSubparts();
         
 		if (childSubparts != null && !childSubparts.isEmpty()){
@@ -1621,7 +1668,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
             
             while (it.hasNext()){              
                 child = (SchedulingSubpart) it.next();
-                buildSchedulingSubpartRows(subpartIds, classAssignment, examAssignment, table, co, child, indentSpaces + 1);
+                buildSchedulingSubpartRows(subpartIds, classAssignment, examAssignment, table, co, child, indentSpaces + 1, false);
             }
         }
     }
@@ -1635,7 +1682,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         	row.setURL("clazz?id=" + aClass.getUniqueId().toString());
 
         if (aClass.isCancelled()) {
-        	row.setStyle("color: gray; font-style: italic;");
+        	row.setStyle("color: #646464; font-style: italic;");
         	row.setTitle(MSG.classNoteCancelled(aClass.getClassLabel(co)));
         }
 
@@ -1699,7 +1746,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         	}
         }
 
-        this.buildClassOrSubpartRow(classAssignment, examAssignment, row, co, aClass, indentSpaces, isEditable && !aClass.isCancelled(), prevLabel);
+        this.buildClassOrSubpartRow(classAssignment, examAssignment, row, co, aClass, indentSpaces, isEditable && !aClass.isCancelled(), prevLabel, false);
         table.addLine(row);
     }
     
@@ -1724,7 +1771,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     }
 
 
-	protected void buildConfigRow(Vector subpartIds, ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, TableInterface table, CourseOffering co, InstrOfferingConfig ioc, boolean printConfigLine, boolean printConfigReservation) {
+	protected void buildConfigRow(Vector subpartIds, ClassAssignmentProxy classAssignment, ExamAssignmentProxy examAssignment, TableInterface table, CourseOffering co, InstrOfferingConfig ioc, boolean printConfigLine, boolean printConfigReservation, boolean printSchedDisc) {
 	    boolean isHeaderRow = true;
 	    boolean isEditable = getSessionContext().hasPermission(ioc.getInstructionalOffering(), Right.InstructionalOfferingDetail);
 	    String configName = ioc.getName();
@@ -1814,10 +1861,13 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         		row.addCell(this.initNormalCell("", isEditable));
         	}
         	if (isShowSchedulePrintNote()){
-                row.addCell(initNormalCell("", isEditable));
+        		row.addCell(this.buildSchedulingDisclaimer(ioc, isEditable));
         	} 
         	if (isShowNote()){
-                row.addCell(initNormalCell("", isEditable));
+        		if (!isShowSchedulePrintNote()) 
+        			row.addCell(this.buildSchedulingDisclaimer(ioc, isEditable));
+        		else
+        			row.addCell(initNormalCell("", isEditable));
         	}
 	        
             if (isShowExam()) {
@@ -1851,7 +1901,8 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         while(it.hasNext()){
             ss = (SchedulingSubpart) it.next();
             if (ss.getParentSubpart() == null){
-                buildSchedulingSubpartRows(subpartIds, classAssignment, examAssignment, table, co, ss, (hasConfig ? 2 : 1));
+                buildSchedulingSubpartRows(subpartIds, classAssignment, examAssignment, table, co, ss, (hasConfig ? 2 : 1), printSchedDisc);
+                printSchedDisc = false;
             }
         }
         it = subpartList.iterator();
@@ -1882,7 +1933,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         InstrOfferingConfig ioc = null;
         while (it.hasNext()){
             ioc = (InstrOfferingConfig) it.next();
-            buildConfigRow(null, classAssignment, examAssignment, table, co, ioc, printConfigLine && instrOfferingConfigs.size()>1, printConfigReservation);
+            buildConfigRow(null, classAssignment, examAssignment, table, co, ioc, printConfigLine && instrOfferingConfigs.size()>1, printConfigReservation, !printConfigLine || instrOfferingConfigs.size() == 1);
         }
     }
 
@@ -1906,7 +1957,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     		} else {
 		        cell = initNormalCell((io.getDemand() != null?io.getDemand().toString(): "0"), isEditable && co.isIsControl().booleanValue());
 	    		if (co.isIsControl().booleanValue() && !io.isNotOffered().booleanValue() && (io.getDemand()==null || io.getDemand().intValue()==0)) {
-	    			cell.setColor("red");
+	    			cell.setColor("#e00000");
 	    			cell.addStyle("='font-weight: bold;");
 	    		}
     		}
@@ -2398,6 +2449,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
     	OfferingConfigInterface ret = new OfferingConfigInterface();
     	
     	ret.setConfigId(ioc.getUniqueId());
+    	ret.setSchedulingDisclaimer(ioc.getSchedulingDisclaimer());
 	    if (ioc.getInstructionalMethod() != null)
 	    	ret.setName(MSG.labelConfigurationWithInstructionalMethod(ioc.getName(), ioc.getInstructionalMethod().getLabel()));
 	    else
@@ -2490,7 +2542,7 @@ public class InstructionalOfferingTableBuilder extends TableBuilder {
         ClassDurationType dtype = ioc.getEffectiveDurationType();
         
         buildTableHeader(ret, getCurrentAcademicSessionId(), dtype == null ? MSG.columnMinPerWk() : dtype.getLabel());
-        buildConfigRow(subpartIds, classAssignment, examAssignment, ret, ioc.getInstructionalOffering().getControllingCourseOffering(), ioc, false, true);
+        buildConfigRow(subpartIds, classAssignment, examAssignment, ret, ioc.getInstructionalOffering().getControllingCourseOffering(), ioc, false, true, false);
         ret.setAnchor("ioc" + ioc.getUniqueId());
         
         return ret;
