@@ -20,3 +20,12 @@
 .project
 .settings/
 build.number 
+
+# Regenerable translation artifacts (not tracked)
+arabic-templates/
+translation-cache.json
+manual-placeholders.txt
+
+# unitime_client: track source, ignore build scratch/output
+/unitime_client/build/
+/unitime_client/dist/

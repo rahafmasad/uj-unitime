@@ -1,0 +1,39 @@
+/* 1. Change the background color of the entire login screen */
+body.bodyMain {
+    background-color: #f4f6f8 !important; /* Soft light gray */
+}
+
+/* 2. Change the Login Box to UJ Green */
+.login-box {
+    background-color: #005A36 !important; /* UJ Green */
+    border: 2px solid #004026 !important;
+    border-radius: 8px !important;
+}
+
+/* 3. INJECT THE UJ LOGO DIRECTLY */
+
+/* Replaces the small logo in the top navigation bar */
+.unitime-PageHeader .logo {
+    background-image: url('../images/uj-logo.jpg') !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    /* You can adjust width/height here if it looks squished */
+}
+
+/* Replaces the large logo on the main login screen */
+/* .unitime-MainLogo {
+    background-image: url('../images/uj-logo.jpg') !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+} */
+
+/* Replaces the faded background logo (often used on login/loading screens) */
+/* .unitime-MainLogoFaded {
+    background-image: url('../images/uj-logo.jpg') !important;
+    background-size: contain !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    opacity: 0.5;
+} */

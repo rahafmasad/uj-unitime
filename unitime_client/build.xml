@@ -1,0 +1,84 @@
+<project name="unitime-client-customization" default="package" basedir=".">
+
+    <!-- It tells the script exactly where to find the original UniTime system -->
+    <property name="upstream.war" value="../Distributions/UniTime.war"/>
+
+    <!-- It tells the script where to place the final, customized .war file that it will create at the end of the process -->
+    <property name="tomcat.webapps.dir" value="C:/Program Files/Apache Software Foundation/Tomcat 10.1/webapps"/>
+
+    <!-- Tells the script where your new frontend files live -->
+    <property name="custom.web.dir" value="src/main/webapp"/>
+    
+    <!-- These define the names of temporary and final folders the script will create inside your unitime_client folder during the process. build is for messy, in-between work, and distribution is for the final product -->
+    <property name="build.dir" value="build"/>
+    <property name="dist.dir" value="dist"/>
+
+    <!-- This target is meant to be run first to ensure a fresh and consistent environment (deletes the build/ and dist/ folders inside unitime_client, removing any old, leftover build files from previous attempts. This prevents confusing errors caused by mixing old and new versions of code.) -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <!-- The main automation logic of the script, which relies on the other properties we defined earlier. -->
+    <target name="package" depends="clean" description="Merges custom UI over UniTime">
+        
+        <!-- Distinct steps -->
+        <!-- Preparation: It starts by creating the necessary directory structure inside the temporary build/ folder to hold the expanded application -->
+        <mkdir dir="${build.dir}/exploded-war"/>
+        <mkdir dir="${dist.dir}"/>
+
+        <echo message="Unpacking upstream UniTime..."/>
+        <!-- Grabs the original UniTime.war file, unzips it into the temporary build/exploded-war folder, which gives the script a baseline version of the entire UniTime system -->
+        <unzip src="${upstream.war}" dest="${build.dir}/exploded-war"/>
+
+        <echo message="Applying client UI overrides..."/>
+        <!-- failonerror="false": It means the build process will not crash if your src/main/webapp folder is empty -->
+        <!-- <copy ... overwrite="true">: applies your frontend modifications -->
+        <!-- It takes everything from your src/main/webapp folder and pastes it directly on top of the expanded UniTime's directory structure -->
+        <!-- overwrite="true" is critical. It means that if you have created a custom login.jsp, it will silently and automatically replace UniTime's original login.jsp -->
+        <copy todir="${build.dir}/exploded-war" overwrite="true" failonerror="false">
+            <fileset dir="${custom.web.dir}"/>
+        </copy>
+
+        <echo message="Packaging final custom WAR..."/>
+        <!-- It gathers all the temporary, combined files from build/exploded-war, zips them back up into a brand-new, deployable .war file, names the final output unitime_client.war and places it in the unitime_client/dist/ folder, ready to be copied into your Apache Tomcat's webapps directory -->
+        <zip destfile="${dist.dir}/unitime_client.war" basedir="${build.dir}/exploded-war"/>
+        
+        <echo message="SUCCESS: Custom WAR built at /unitime_client/dist/unitime_client.war"/>
+
+        <!-- Auto-deploy to Tomcat -->
+        <echo message="Auto-deploying to Tomcat..."/>
+        <copy file="${dist.dir}/unitime_client.war" 
+              tofile="${tomcat.webapps.dir}/UniTime.war" 
+              overwrite="true"/>
+              
+        <echo message="SUCCESS: Fully packaged and deployed to Tomcat!"/>
+    </target>
+
+    <!-- Builds Arabic into the GWT permutation by injecting _ar.properties
+         into the upstream source tree, running the full upstream build,
+         then cleaning up so the upstream Git tree stays untouched. -->
+    <target name="build-arabic" description="Inject Arabic translations and run full upstream GWT build">
+
+        <property name="upstream.dir" value=".."/>
+        <property name="arabic.src" value="src/main/arabic"/>
+
+        <echo message="1. Injecting Arabic .properties into upstream JavaSource..."/>
+        <copy todir="${upstream.dir}/JavaSource" overwrite="true">
+            <fileset dir="${arabic.src}"/>
+        </copy>
+
+        <echo message="2. Running full upstream GWT build (this takes several minutes)..."/>
+        <exec dir="${upstream.dir}" executable="cmd" failonerror="true">
+            <arg line="/c ant build"/>
+        </exec>
+
+        <echo message="3. Removing injected Arabic files to keep upstream Git clean..."/>
+        <delete>
+            <fileset dir="${upstream.dir}/JavaSource" includes="**/*_ar.properties"/>
+        </delete>
+
+        <echo message="DONE. Distributions/UniTime.war now contains the Arabic GWT permutation."/>
+    </target>
+
+</project>
