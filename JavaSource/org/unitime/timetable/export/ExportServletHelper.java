@@ -39,6 +39,7 @@ import jakarta.servlet.http.HttpSession;
 import org.unitime.timetable.api.ApiToken;
 import org.unitime.timetable.defaults.ApplicationProperty;
 import org.unitime.timetable.events.QueryEncoderBackend;
+import org.unitime.timetable.model.Roles;
 import org.unitime.timetable.model.dao.SessionDAO;
 import org.unitime.timetable.security.SessionContext;
 import org.unitime.timetable.security.UserAuthority;
@@ -76,10 +77,12 @@ public class ExportServletHelper implements ExportHelper {
 			if (token != null && ApplicationProperty.ApiCanUseAPIToken.isTrue()) {
 				uc = ((ApiToken)SpringApplicationContextHolder.getBean("apiToken")).getContext(getParameter("token"));
 				if (uc != null) iContext = new CustomExportContext(request.getSession(), uc);
-			} else if (isRequestEncoded()) {
-				String user = getParameter("user");
-				if (user != null)
-					uc = new UniTimeUserContext(user, null, null, null);
+			} else if (isRequestEncoded() && canAuthorizeEncodedQueries()) {
+				String[] user = getParameterValues("user");
+				String[] role = getParameterValues("role");
+				if (user != null && user.length == 1 && user[0] != null && !user[0].isEmpty() &&
+					role != null && role.length == 1 && role[0] != null && !role[0].isEmpty() && !Roles.ROLE_ANONYMOUS.equals(role[0]))
+					uc = new UniTimeUserContext(user[0], null, null, null);
 			}
 			if (uc != null) {
 	    		String role = getParameter("role");
@@ -246,6 +249,14 @@ public class ExportServletHelper implements ExportHelper {
 	@Override
 	public boolean isRequestEncoded() {
 		return iParams instanceof QParams;
+	}
+	
+	public boolean canAuthorizeEncodedQueries() {
+		String output = getParameter("output");
+		String regexp = ApplicationProperty.ExportAuthorizeEncodedQueries.value();
+		if (output == null || output.isEmpty()) return false;
+		if (regexp == null || regexp.isEmpty()) return true;
+		return output.matches(regexp);
 	}
 	
 	public class CustomExportContext extends HttpSessionContext {

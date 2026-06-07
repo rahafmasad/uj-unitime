@@ -4055,6 +4055,30 @@ public interface GwtMessages extends Messages {
 	@DefaultMessage("Standard Scheduling Disclaimers")
 	@DoNotTranslate
 	String pageStandardSchedulingDisclaimers();
+	
+	@DefaultMessage("Assigned Examinations")
+	@DoNotTranslate
+	String pageAssignedExaminations();
+	
+	@DefaultMessage("Not-Assigned Examinations")
+	@DoNotTranslate
+	String pageNotAssignedExaminations();
+	
+	@DefaultMessage("Examination Assignment Changes")
+	@DoNotTranslate
+	String pageExaminationAssignmentChanges();
+	
+	@DefaultMessage("Examination Conflict-Based Statistics")
+	@DoNotTranslate
+	String pageExaminationConflictBasedStatistics();
+	
+	@DefaultMessage("Examination Assignment")
+	@DoNotTranslate
+	String pageExaminationAssignment();
+	
+	@DefaultMessage("Examination Timetable")
+	@DoNotTranslate
+	String pageExaminationTimetable();
 
 	@DefaultMessage("N/A")
 	String itemNotApplicable();
@@ -8107,4 +8131,7 @@ public interface GwtMessages extends Messages {
 	
 	@DefaultMessage("Update")
 	String colUpdate();
+	
+	@DefaultMessage("Student {0}")
+	String constraintStudent(String constraint);
 }

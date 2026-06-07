@@ -19,11 +19,13 @@
 */
 package org.unitime.timetable.solver.exam;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -55,6 +57,7 @@ import org.dom4j.Element;
 import org.unitime.localization.impl.Localization;
 import org.unitime.localization.messages.ExaminationMessages;
 import org.unitime.timetable.model.SolverParameterGroup.SolverType;
+import org.unitime.timetable.model.SubjectArea;
 import org.unitime.timetable.model.dao.SubjectAreaDAO;
 import org.unitime.timetable.solver.AbstractSolver;
 import org.unitime.timetable.solver.SolverDisposeListener;
@@ -500,6 +503,39 @@ public class ExamSolver extends AbstractSolver<Exam, ExamPlacement, ExamModel> i
     }
     
     @Override
+    public Collection<ExamAssignmentInfo> getAssignedExams(Collection<Long> subjectAreaIds) {
+    	if (subjectAreaIds == null || subjectAreaIds.isEmpty() || subjectAreaIds.contains(-1l))
+    		return getAssignedExams();
+    	List<String> abbvs = new ArrayList<String>();
+    	for (Long subjectAreaId: subjectAreaIds) {
+    		SubjectArea sa = SubjectAreaDAO.getInstance().get(subjectAreaId);
+    		if (sa != null) abbvs.add(sa.getSubjectAreaAbbreviation() + " ");
+    	}
+    	Lock lock = currentSolution().getLock().readLock();
+        lock.lock();
+        try {
+            Vector<ExamAssignmentInfo> ret = new Vector<ExamAssignmentInfo>();
+            for (Exam exam: currentSolution().getModel().variables()) {
+                boolean hasSubjectArea = false;
+                owners: for (Iterator<ExamOwner> f=exam.getOwners().iterator();!hasSubjectArea && f.hasNext();) {
+                    ExamOwner ecs = (ExamOwner)f.next();
+                    for (String abbv: abbvs) {
+                    	if (ecs.getName().startsWith(abbv)) { hasSubjectArea = true; break owners; }
+                    }
+                }
+                if (hasSubjectArea) {
+                	ExamPlacement placement = currentSolution().getAssignment().getValue(exam);
+                	if (placement!=null)
+                		ret.add(new ExamAssignmentInfo(placement, currentSolution().getAssignment()));
+                }
+            }
+            return ret;
+        } finally {
+        	lock.unlock();
+        }
+    }
+    
+    @Override
     public Collection<ExamInfo> getUnassignedExams(Long subjectAreaId) {
         if (subjectAreaId==null || subjectAreaId<0) return getUnassignedExams();
         String sa = SubjectAreaDAO.getInstance().get(subjectAreaId).getSubjectAreaAbbreviation()+" ";
@@ -512,6 +548,39 @@ public class ExamSolver extends AbstractSolver<Exam, ExamPlacement, ExamModel> i
                 for (Iterator<ExamOwner> f=exam.getOwners().iterator();!hasSubjectArea && f.hasNext();) {
                     ExamOwner ecs = f.next();
                     hasSubjectArea = ecs.getName().startsWith(sa);
+                }
+                if (hasSubjectArea) {
+                	ExamPlacement placement = currentSolution().getAssignment().getValue(exam);
+                	if (placement==null)
+                		ret.add(new ExamInfo(exam));
+                }
+            }
+            return ret;
+        } finally {
+        	lock.unlock();
+        }
+    }
+    
+    @Override
+    public Collection<ExamInfo> getUnassignedExams(Collection<Long> subjectAreaIds) {
+    	if (subjectAreaIds == null || subjectAreaIds.isEmpty() || subjectAreaIds.contains(-1l))
+    		return getUnassignedExams();
+    	List<String> abbvs = new ArrayList<String>();
+    	for (Long subjectAreaId: subjectAreaIds) {
+    		SubjectArea sa = SubjectAreaDAO.getInstance().get(subjectAreaId);
+    		if (sa != null) abbvs.add(sa.getSubjectAreaAbbreviation() + " ");
+    	}
+    	Lock lock = currentSolution().getLock().readLock();
+        lock.lock();
+        try {
+        	Vector<ExamInfo> ret = new Vector<ExamInfo>();
+            for (Exam exam: currentSolution().getModel().variables()) {
+                boolean hasSubjectArea = false;
+                owners: for (Iterator<ExamOwner> f=exam.getOwners().iterator();!hasSubjectArea && f.hasNext();) {
+                    ExamOwner ecs = (ExamOwner)f.next();
+                    for (String abbv: abbvs) {
+                    	if (ecs.getName().startsWith(abbv)) { hasSubjectArea = true; break owners; }
+                    }
                 }
                 if (hasSubjectArea) {
                 	ExamPlacement placement = currentSolution().getAssignment().getValue(exam);
@@ -622,6 +691,80 @@ public class ExamSolver extends AbstractSolver<Exam, ExamPlacement, ExamModel> i
                     for (Iterator<ExamOwner> f=exam.getOwners().iterator();!hasSubjectArea && f.hasNext();) {
                         ExamOwner ecs = f.next();
                         hasSubjectArea = ecs.getName().startsWith(sa);
+                    }
+                    if (!hasSubjectArea) continue;
+                }
+                if (!ToolBox.equals(exam.getBestAssignment(),currentSolution().getAssignment().getValue(exam))) {
+                    changes.add(new ExamAssignmentInfo[] {
+                            new ExamAssignmentInfo(exam,exam.getBestAssignment(),currentSolution().getAssignment()),
+                            new ExamAssignmentInfo(exam,currentSolution().getAssignment().getValue(exam),currentSolution().getAssignment())});
+                }
+            }
+        } finally {
+        	lock.unlock();
+        }
+        return changes;
+    }
+    
+    @Override
+    public Collection<ExamAssignmentInfo[]> getChangesToInitial(Collection<Long> subjectAreaIds) {
+    	List<String> abbvs = null;
+    	if (subjectAreaIds != null && !subjectAreaIds.isEmpty() && !subjectAreaIds.contains(-1l)) {
+    		abbvs = new ArrayList<String>();
+        	for (Long subjectAreaId: subjectAreaIds) {
+        		SubjectArea sa = SubjectAreaDAO.getInstance().get(subjectAreaId);
+        		if (sa != null) abbvs.add(sa.getSubjectAreaAbbreviation() + " ");
+        	}
+    	}
+        Vector<ExamAssignmentInfo[]> changes = new Vector<ExamAssignmentInfo[]>();
+        Lock lock = currentSolution().getLock().readLock();
+        lock.lock();
+        try {
+            for (Exam exam: currentSolution().getModel().variables()) {
+                if (abbvs!=null) {
+                	boolean hasSubjectArea = false;
+                    owners: for (Iterator<ExamOwner> f=exam.getOwners().iterator();!hasSubjectArea && f.hasNext();) {
+                        ExamOwner ecs = (ExamOwner)f.next();
+                        for (String abbv: abbvs) {
+                        	if (ecs.getName().startsWith(abbv)) { hasSubjectArea = true; break owners; }
+                        }
+                    }
+                    if (!hasSubjectArea) continue;
+                }
+                if (!ToolBox.equals(exam.getInitialAssignment(),currentSolution().getAssignment().getValue(exam))) {
+                    changes.add(new ExamAssignmentInfo[] {
+                            new ExamAssignmentInfo(exam,exam.getInitialAssignment(), currentSolution().getAssignment()),
+                            new ExamAssignmentInfo(exam,currentSolution().getAssignment().getValue(exam), currentSolution().getAssignment())});
+                }
+            }
+        } finally {
+        	lock.unlock();
+        }
+        return changes;
+    }
+    
+    @Override
+    public Collection<ExamAssignmentInfo[]> getChangesToBest(Collection<Long> subjectAreaIds) {
+    	List<String> abbvs = null;
+    	if (subjectAreaIds != null && !subjectAreaIds.isEmpty() && !subjectAreaIds.contains(-1l)) {
+    		abbvs = new ArrayList<String>();
+        	for (Long subjectAreaId: subjectAreaIds) {
+        		SubjectArea sa = SubjectAreaDAO.getInstance().get(subjectAreaId);
+        		if (sa != null) abbvs.add(sa.getSubjectAreaAbbreviation() + " ");
+        	}
+    	}
+        Vector<ExamAssignmentInfo[]> changes = new Vector<ExamAssignmentInfo[]>();
+        Lock lock = currentSolution().getLock().readLock();
+        lock.lock();
+        try {
+            for (Exam exam: currentSolution().getModel().variables()) {
+            	if (abbvs!=null) {
+                	boolean hasSubjectArea = false;
+                    owners: for (Iterator<ExamOwner> f=exam.getOwners().iterator();!hasSubjectArea && f.hasNext();) {
+                        ExamOwner ecs = (ExamOwner)f.next();
+                        for (String abbv: abbvs) {
+                        	if (ecs.getName().startsWith(abbv)) { hasSubjectArea = true; break owners; }
+                        }
                     }
                     if (!hasSubjectArea) continue;
                 }

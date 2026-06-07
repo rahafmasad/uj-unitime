@@ -29,6 +29,88 @@
 	<version>4.9.${build.number}</version>
 	<release-date>${build.date}</release-date>
 	<category>
+		<title>Examination Timetabling</title>
+		<item>
+			<name>Technology Update / GWT</name>
+			<description>
+				<line>The following pages have been rewritten to GWT:
+					<line>Assigned Examinations</line>
+					<line>Not-Assigned Examinations</line>
+					<line>Examination Assignment Changes</line>
+					<line>Examination Conflict-Based Statistics</line>
+					<line>Examination Assignment Reports</line>
+					<line>Examination Timetable Grid</line>
+				</line>
+			</description>
+		</item>
+	</category>
+	<category>
+		<title>Administration</title>
+		<item>
+			<name>Security: Session Independent If No Session Given</name>
+			<description>
+				<line>Corrected session checking for the session independent if no session is given roles during authorization.</line>
+			</description>
+		</item>
+	</category>
+</release>
+
+<release>
+	<version>4.9.135</version>
+	<release-date>Sat, 23 May 2026</release-date>
+	<category>
+		<title>Course Timetabling</title>
+		<item>
+			<name>Instructional Offering Detail: Curricula</name>
+			<description>
+				<line>Fixed a recently introduced issue with the student counts on the second and later academic area lines.</line>
+			</description>
+		</item>
+	</category>
+	<category>
+		<title>Administration</title>
+		<item>
+			<name>Export: Encrypted URLs</name>
+			<description>
+				<line>Fixed a potential vulnerability problem with encrypted export URLs, allowing an attacker to inject a wrong user ID.</line>
+				<line>It is now possible to specify which exporters allow encrypted URL authorizations (by default, only the iCalendar exports are allowed).
+					<line>This can be configured using the unitime.export.authorizeEncodedQueries application property.</line>
+				</line>
+			</description>
+		</item>
+	</category>
+</release>
+
+<release>
+	<version>4.9.131</version>
+	<release-date>Mon, 18 May 2026</release-date>
+	<category>
+		<title>Course Timetabling</title>
+		<item>
+			<name>Edit Class: Exact Times</name>
+			<description>
+				<line>When adding exact times, do not include a time without a day of the week selected.</line>
+			</description>
+		</item>
+		<item>
+			<name>Navigation</name>
+			<description>
+				<line>Corrected navigation using the Back button over multiple detail pages, newly rewritten to GWT.</line>
+			</description>
+		</item>
+		<item>
+			<name>Instructional Offering Detail: Curricula</name>
+			<description>
+				<line>Fixed a recently introduced issue not showing some curricula in certain cases.</line>
+			</description>
+		</item>
+	</category>
+</release>
+
+<release>
+	<version>4.9.125</version>
+	<release-date>Sat, 18 Apr 2026</release-date>
+	<category>
 		<title>Course Timetabling</title>
 		<item>
 			<name>Distribution Preferences: Single Table</name>

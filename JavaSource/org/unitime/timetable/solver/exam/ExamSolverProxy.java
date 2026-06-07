@@ -39,7 +39,9 @@ public interface ExamSolverProxy extends ExamAssignmentProxy, CommonSolverInterf
     public Collection<ExamAssignmentInfo> getAssignedExams();
     public Collection<ExamInfo> getUnassignedExams();
     public Collection<ExamAssignmentInfo> getAssignedExams(Long subjectAreaId);
+    public Collection<ExamAssignmentInfo> getAssignedExams(Collection<Long> subjectAreaIds);
     public Collection<ExamInfo> getUnassignedExams(Long subjectAreaId);
+    public Collection<ExamInfo> getUnassignedExams(Collection<Long> subjectAreaIds);
     public Collection<ExamAssignmentInfo> getAssignedExamsOfRoom(Long roomId);
     public Collection<ExamAssignmentInfo> getAssignedExamsOfInstructor(Long instructorId);
     
@@ -53,6 +55,8 @@ public interface ExamSolverProxy extends ExamAssignmentProxy, CommonSolverInterf
     
     public Collection<ExamAssignmentInfo[]> getChangesToInitial(Long subjectAreaId);
     public Collection<ExamAssignmentInfo[]> getChangesToBest(Long subjectAreaId);
+    public Collection<ExamAssignmentInfo[]> getChangesToInitial(Collection<Long> subjectAreaIds);
+    public Collection<ExamAssignmentInfo[]> getChangesToBest(Collection<Long> subjectAreaIds);
     
     public ExamConflictStatisticsInfo getCbsInfo();
     public ExamConflictStatisticsInfo getCbsInfo(Long examId);

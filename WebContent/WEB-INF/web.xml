@@ -264,6 +264,12 @@
     	<url-pattern>/examEdit</url-pattern>
     	<url-pattern>/examAdd</url-pattern>
     	<url-pattern>/catalog</url-pattern>
+    	<url-pattern>/assignedExams</url-pattern>
+    	<url-pattern>/notAssignedExams</url-pattern>
+    	<url-pattern>/examChanges</url-pattern>
+    	<url-pattern>/examAssignmentReport</url-pattern>
+    	<url-pattern>/ecbs</url-pattern>
+    	<url-pattern>/examGrid</url-pattern>
     </servlet-mapping>
 	
 	<filter>

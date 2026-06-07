@@ -637,9 +637,7 @@ public class CourseCurriculaTable extends Composite {
 			if (curriculum.getId() == null) { otherCurricula.add(curriculum); continue; }
 			
 			iAllAreas.add(curriculum.getAcademicArea().getId());
-			if (lastArea.isEmpty() || lastArea.get(0).getAcademicArea().equals(curriculum.getAcademicArea())) {
-				lastArea.add(curriculum);
-			} else {
+			if (!lastArea.isEmpty() && !lastArea.get(0).getAcademicArea().equals(curriculum.getAcademicArea())) {
 				List<Widget> line = new ArrayList<Widget>();
 				line.add(new AreaLabel(lastArea.get(0).getAcademicArea().getAbbv() + " - " + lastArea.get(0).getAcademicArea().getName() + " (" + lastArea.size() + ")"));
 				int tExp = 0, tLast = 0, tEnrl = 0, tProj = 0, tReq = 0, tSsExp = 0, tSsProj = 0;
@@ -664,7 +662,10 @@ public class CourseCurriculaTable extends Composite {
 				Row row = new Row(RowType.Area, lastArea.get(0).getAcademicArea().getId());
 				iCurricula.addRow(row, line);
 				lastArea.clear();
+				for (int i = 0; i <totalThisArea.length; i++)
+					totalThisArea[i] = new int[] {0, 0, 0, 0, 0, 0, 0};
 			}
+			lastArea.add(curriculum);
 			
 			List<Widget> line = new ArrayList<Widget>();
 			line.add(new Label(curriculum.getAbbv()));

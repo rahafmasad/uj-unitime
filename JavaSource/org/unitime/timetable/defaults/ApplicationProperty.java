@@ -299,6 +299,11 @@ public enum ApplicationProperty {
 	@DefaultValue("true")
 	@Description("Configuration: hash calendar queries to make the iCalendar URL short")
 	UrlEncoderHashQueryWhenAsked("unitime.encode.hash"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
+	@Description("Configuration: allow URL encoding for anonymous access (e.g., Lookup Examinations page can provide encrypted/hashed export URLs even when used without authentication).")
+	UrlEncoderAnonymousAccess("unitime.encode.anonymous"),
 
 	@Description("JAAS authentication modules (deprecated)")
 	@Deprecated
@@ -3785,6 +3790,36 @@ public enum ApplicationProperty {
 	
 	@Type(Boolean.class)
 	@DefaultValue("false")
+	@Description("Assigned Examinations: switch the user interface back to the old (Struts-based) assigned examinations page")
+	LegacyAssignedExams("unitime.legacy.assignedExams"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
+	@Description("Not-Assigned Examinations: switch the user interface back to the old (Struts-based) not-assigned examinations page")
+	LegacyNotAssignedExams("unitime.legacy.notAssignedExams"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
+	@Description("Examination Assignment Changes: switch the user interface back to the old (Struts-based) examination assignment changes page")
+	LegacyExamAssignmentChanges("unitime.legacy.examChanges"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
+	@Description("Examination Reports: switch the user interface back to the old (Struts-based) examination report page (Examinations > Examination Timetabling > Reports)")
+	LegacyExamAssignmentReport("unitime.legacy.examAssignmentReport"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
+	@Description("Examination Conflict-Based Statistics: switch the user interface back to the old (Struts-based) examination conflict-based statistics page")
+	LegacyExamCBS("unitime.legacy.examCBS"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
+	@Description("Examination Timetable: switch the user interface back to the old (Struts-based) examination timetable page")
+	LegacyExamGrid("unitime.legacy.examGrid"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("false")
 	@Description("Student Scheduling: provide associated (parent) course -- a student requesting both courses cannot get the course without also getting the associated course")
 	@Since(4.9)
 	StudentSchedulingParentCourse("unitime.sectioning.parentCourse"),
@@ -3830,6 +3865,24 @@ public enum ApplicationProperty {
 	"(this optional check fixes an issue where a student may end up in a state where a substitute course is enrolled without a matching not-assigned course request that it is substituting)")
 	@Since(4.9)
 	EnrollmentCheckSubstitutes("unitime.enrollment.checkSubstitutes"),
+	
+	@Type(Boolean.class)
+	@DefaultValue("true")
+	@Description("Online Student Scheduling: use left join fetch when loading students")
+	@Since(4.9)
+	EnrollmentPrefetchStudents("unitime.enrollment.prefetchStudents"),
+
+	@Type(Boolean.class)
+	@DefaultValue("true")
+	@Description("Online Student Scheduling: use left join fetch when loading offerings")
+	@Since(4.9)
+	EnrollmentPrefetchOfferings("unitime.enrollment.prefetchOfferings"),
+	
+	@DefaultValue(".*\\.ics")
+	@Description("Exporter: for the encoded export queries (/export?q= or /export?x=), the exporter (output parameter) must match this regular expression for authorization. " +
+	"This means that for matching exports, it is assumed that the export is run by the user for whom the encoded query was generated. By default, only iCalendar exports are allowed.")
+	@Since(4.9)
+	ExportAuthorizeEncodedQueries("unitime.export.authorizeEncodedQueries")
 	;
 
 	String iKey;

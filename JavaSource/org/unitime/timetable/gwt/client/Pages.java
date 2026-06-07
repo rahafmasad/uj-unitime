@@ -28,11 +28,17 @@ import org.unitime.timetable.gwt.client.curricula.CurriculumProjectionRulesPage;
 import org.unitime.timetable.gwt.client.departments.DepartmentsPage;
 import org.unitime.timetable.gwt.client.events.EventResourceTimetable;
 import org.unitime.timetable.gwt.client.events.EventRoomAvailability;
+import org.unitime.timetable.gwt.client.exams.AssignedExamsPage;
+import org.unitime.timetable.gwt.client.exams.ExamAssignmentChangesPage;
+import org.unitime.timetable.gwt.client.exams.ExamConflictBasedStatisticsPage;
 import org.unitime.timetable.gwt.client.exams.ExamDetailPage;
 import org.unitime.timetable.gwt.client.exams.ExamDistributionsEditPage;
 import org.unitime.timetable.gwt.client.exams.ExamDistributionsPage;
 import org.unitime.timetable.gwt.client.exams.ExamEditPage;
+import org.unitime.timetable.gwt.client.exams.ExamGridPage;
+import org.unitime.timetable.gwt.client.exams.ExamReportsPage;
 import org.unitime.timetable.gwt.client.exams.ExamsPage;
+import org.unitime.timetable.gwt.client.exams.NotAssignedExamsPage;
 import org.unitime.timetable.gwt.client.hql.SavedHQLPage;
 import org.unitime.timetable.gwt.client.instructor.InstructorAssignmentPreferencesPage;
 import org.unitime.timetable.gwt.client.instructor.InstructorAttributesPage;
@@ -433,7 +439,30 @@ public enum Pages {
 		public Widget create() { return new CourseCatalogPage(); }
 		public String name(GwtMessages messages) { return messages.pageCourseCatalog(); }
 		}),
-	
+	assignedExams(new PageFactory() {
+		public Widget create() { return new AssignedExamsPage(); }
+		public String name(GwtMessages messages) { return messages.pageAssignedExaminations(); }
+		}, SolverWarnings.Type.exam),
+	notAssignedExams(new PageFactory() {
+		public Widget create() { return new NotAssignedExamsPage(); }
+		public String name(GwtMessages messages) { return messages.pageNotAssignedExaminations(); }
+		}, SolverWarnings.Type.exam),
+	examChanges(new PageFactory() {
+		public Widget create() { return new ExamAssignmentChangesPage(); }
+		public String name(GwtMessages messages) { return messages.pageExaminationAssignmentChanges(); }
+		}, SolverWarnings.Type.exam),
+	examAssignmentReport(new PageFactory() {
+		public Widget create() { return new ExamReportsPage(); }
+		public String name(GwtMessages messages) { return messages.pageExaminationReports(); }
+		}, SolverWarnings.Type.exam),
+	ecbs(new PageFactory() {
+		public Widget create() { return new ExamConflictBasedStatisticsPage(); }
+		public String name(GwtMessages messages) { return messages.pageExaminationConflictBasedStatistics(); }
+		}),
+	examGrid(new PageFactory() {
+		public Widget create() { return new ExamGridPage(); }
+		public String name(GwtMessages messages) { return messages.pageExaminationTimetable(); }
+		}),
 	;
 	
 	private PageFactory iFactory;
