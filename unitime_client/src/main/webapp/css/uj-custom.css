@@ -13,9 +13,9 @@
 /* 3. INJECT THE UJ LOGO DIRECTLY */
 
 /* Replaces the small logo in the top navigation bar */
-/* .unitime-PageHeader .logo {
-    background-image: url('../images/uj-logo.jpg') !important;
-    background-size: contain !important;
-    background-position: center !important;
+.unitime-PageHeader .logo {
+    background-image: url('../images/uj-logo.png') !important;
+    background-size: contain !important;       /* not 100% 100% — avoids distortion */
     background-repeat: no-repeat !important;
-} */
+    background-position: center !important;
+}
